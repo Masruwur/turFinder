@@ -380,7 +380,7 @@ export default function TurFindPage() {
                 <img
                   src={turf.image}
                   alt={turf.name}
-                  className="w-full h-full object-cover object-bottom"
+                  className="w-full h-full object-cover object-bottom rounded-xl"
                 />
               </div>
 
