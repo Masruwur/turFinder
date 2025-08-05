@@ -4,6 +4,7 @@ import turFind from "../assets/turFind.jpg";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import ScrollTrigger from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -12,6 +13,11 @@ export default function FinderPage() {
   const leftCardRef = useRef<HTMLDivElement | null>(null);
   const rightCardRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
+
+  const handleCardClick = (path: string): void => {
+    navigate(path);
+  };
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
@@ -105,6 +111,7 @@ export default function FinderPage() {
       className="flex flex-col items-center justify-center w-full min-h-screen gap-10
                  lg:flex-row lg:gap-0">
       <div
+        onClick={() => handleCardClick("/turfind")}
         ref={leftCardRef}
         className="relative bg-black rounded-xl mr-20 -rotate-7 drop-shadow-xl drop-shadow-almostblack/70
                    flex items-center justify-center overflow-hidden cursor-pointer
