@@ -2,12 +2,14 @@ interface LoginProps {
   isProfileOpen: boolean;
   toggleProfile: () => void;
   handleLogin: () => void;
+  OnClickingSignUp: () => void;
 }
 
 export default function Login({
   isProfileOpen,
   toggleProfile,
   handleLogin,
+  OnClickingSignUp,
 }: LoginProps) {
   return (
     <>
@@ -110,8 +112,8 @@ export default function Login({
               <div className="text-center text-sm text-gray-600">
                 Don't have an account?{" "}
                 <a
-                  href="#"
-                  className="text-blue-600 hover:text-blue-800 transition-colors font-medium">
+                  onClick={OnClickingSignUp}
+                  className="text-blue-600 hover:text-blue-800 transition-colors font-medium cursor-pointer">
                   Sign up
                 </a>
               </div>

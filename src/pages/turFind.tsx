@@ -13,6 +13,7 @@ import Jaff from "../assets/turfs/jaff.png";
 import KickOff from "../assets/turfs/kickoff.png";
 import Metroplex from "../assets/turfs/metroplex.png";
 import NorthArena from "../assets/turfs/northarena.png";
+import NavBar from "../components/NavBar";
 
 // ===== TYPE DEFINITIONS =====
 interface TurfCard {
@@ -60,7 +61,7 @@ export default function TurFindPage() {
       rating: 4.6,
       price: 1200,
       image: ClubVolta,
-      distance: "1.2 miles away",
+      distance: "1.2 km away",
     },
     {
       id: 3,
@@ -69,7 +70,7 @@ export default function TurFindPage() {
       rating: 4.9,
       price: 1800,
       image: GSP,
-      distance: "0.8 miles away",
+      distance: "0.8 km away",
     },
     {
       id: 4,
@@ -78,7 +79,7 @@ export default function TurFindPage() {
       rating: 4.5,
       price: 1000,
       image: Metroplex,
-      distance: "2.1 miles away",
+      distance: "2.1 km away",
     },
     {
       id: 5,
@@ -87,7 +88,7 @@ export default function TurFindPage() {
       rating: 4.7,
       price: 1600,
       image: KickOff,
-      distance: "1.5 miles away",
+      distance: "1.5 km away",
     },
     {
       id: 6,
@@ -96,7 +97,34 @@ export default function TurFindPage() {
       rating: 4.4,
       price: 2000,
       image: Jaff,
-      distance: "3.2 miles away",
+      distance: "3.2 km away",
+    },
+    {
+      id: 7,
+      name: "North Arena",
+      location: "Sector-7, Uttara",
+      rating: 4.8,
+      price: 1500,
+      image: NorthArena,
+      distance: "0.5 km away",
+    },
+    {
+      id: 8,
+      name: "Club Volta",
+      location: "Matikata Rd, Cantonment",
+      rating: 4.6,
+      price: 1200,
+      image: ClubVolta,
+      distance: "1.2 km away",
+    },
+    {
+      id: 9,
+      name: "Galacticos Sports Pavilion (GSP)",
+      location: "Sector-15, Uttara",
+      rating: 4.9,
+      price: 1800,
+      image: GSP,
+      distance: "0.8 km away",
     },
   ];
 
@@ -177,12 +205,24 @@ export default function TurFindPage() {
 
   // ===== COMPONENT RENDER =====
   return (
-    <div className="w-full min-h-screen bg-almostwhite px-30 py-5 relative">
+    <div className="w-full min-h-screen bg-green-800 px-10 md:px-20 lg:px-30 py-20 relative">
+      {/* ===== BACKGROUND GRID ===== */}
+      <div
+        style={{
+          position: "fixed",
+          inset: -1,
+          zIndex: 0,
+          backgroundImage:
+            "repeating-linear-gradient(to right, #262626 0px, #262626 1px, transparent 1px, transparent 100px), repeating-linear-gradient(to bottom, #262626 0px, #262626 1px, transparent 1px, transparent 100px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+      <NavBar />
       <div>
         {/* ===== PAGE HEADER ===== */}
         <h1
           ref={titleRef}
-          className="font-polysans text-6xl font-bold text-almostblack mb-8 mt-10 tracking-tight">
+          className="font-polysans text-7xl font-bold text-almostwhite mb-8 mt-10 tracking-tight relative">
           BOOK YOUR TURF!
         </h1>
 
@@ -202,7 +242,7 @@ export default function TurFindPage() {
               value={searchTerm}
               onChange={(input) => setSearchTerm(input.target.value)}
               className="w-full pl-13 pr-4 py-4 text-lg rounded-2xl transition-colors duration-300
-                         bg-almostwhite border-3 border-solid border-almostblack focus:outline-none focus:ring-2
+                         bg-beige focus:outline-none focus:ring-2
                          font-redhatmono text-almostblack"
             />
           </div>
@@ -211,15 +251,15 @@ export default function TurFindPage() {
         {/* ===== CONTROLS SECTION ===== */}
         <div
           ref={controlsRef}
-          className="flex items-center justify-between mb-8 flex-wrap gap-4">
+          className="flex items-center justify-between mb-8 flex-wrap gap-4 relative">
           <div className="flex items-center gap-4">
             {/* ===== VIEW TOGGLE BUTTONS ===== */}
-            <div className="flex rounded-xl p-1 bg-beige border-2 border-solid border-almostblack">
+            <div className="flex rounded-xl p-1 bg-yellow">
               {/* Grid view button */}
               <button
                 onClick={handleViewToggle}
                 className={`p-3 rounded-lg transition-all duration-300 cursor-pointer
-                          ${isGridView ? "bg-yellow" : "bg-transparent"}`}>
+                          ${isGridView ? "bg-almostwhite" : "bg-transparent"}`}>
                 <img
                   src={GridIcon}
                   className="w-5"
@@ -229,7 +269,9 @@ export default function TurFindPage() {
               <button
                 onClick={handleViewToggle}
                 className={`p-3 rounded-lg transition-all duration-300 cursor-pointer
-                          ${!isGridView ? "bg-yellow" : "bg-transparent"}`}>
+                          ${
+                            !isGridView ? "bg-almostwhite" : "bg-transparent"
+                          }`}>
                 <img
                   src={ListIcon}
                   className="w-5"
@@ -242,8 +284,8 @@ export default function TurFindPage() {
               <button
                 onClick={() => setShowSortDropdown(!showSortDropdown)}
                 className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors duration-300 cursor-pointer
-                           bg-beige border-2 border-solid border-almostblack hover:bg-yellow
-                           font-redhatmono text-almostblack">
+                           bg-almostwhite hover:bg-yellow
+                           font-redhatmono text-almost">
                 Sort By:{" "}
                 {sortOptions.find((opt) => opt.value === sortBy)?.label}
                 <img
@@ -258,8 +300,8 @@ export default function TurFindPage() {
               {showSortDropdown && (
                 <div
                   ref={sortDropdownRef}
-                  className="absolute top-full left-0 mt-2 w-64 rounded-xl shadow-lg z-50
-                             bg-almostwhite border-2 border-solid border-almostblack">
+                  className="absolute top-full left-0 mt-2 w-67 rounded-xl shadow-lg z-50
+                             bg-almostwhite">
                   {sortOptions.map((option, index) => (
                     <button
                       key={option.value}
@@ -293,7 +335,7 @@ export default function TurFindPage() {
               <button
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
                 className="flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-colors duration-300 cursor-pointer
-                           bg-lightgreen border-2 border-solid border-almostblack hover:bg-green hover:text-almostwhite
+                           bg-lightgreen hover:bg-darkgreen hover:text-almostwhite
                            font-redhatmono text-almostblack">
                 <img
                   src={FilterIcon}
@@ -351,7 +393,7 @@ export default function TurFindPage() {
           </div>
 
           {/* ===== RESULTS COUNT ===== */}
-          <div className="font-redhatmono text-almostblack">
+          <div className="font-redhatmono text-almostwhite relative">
             {filteredTurfs.length} turfs found
           </div>
         </div>
@@ -359,7 +401,7 @@ export default function TurFindPage() {
         {/* ===== TURF CARDS GRID ===== */}
         <div
           ref={cardsRef}
-          className={`grid gap-6
+          className={`grid border-2 border-almostblack relative
                       ${
                         isGridView
                           ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" // Grid layout
@@ -368,19 +410,19 @@ export default function TurFindPage() {
           {filteredTurfs.map((turf) => (
             <div
               key={turf.id}
-              className="turf-card rounded-2xl p-6 cursor-pointer transition-shadow duration-300 hover:shadow-lg
-                         bg-beige border-3 border-solid border-almostblack"
+              className="turf-card p-6 cursor-pointer transition-shadow duration-300 hover:shadow-lg
+                         bg-almostwhite border-1 border-almostblack"
               onMouseEnter={handleCardHover}
               onMouseLeave={handleCardLeave}>
               {/* ===== TURF IMAGE PLACEHOLDER ===== */}
               {/* Replace this section with actual images when available */}
               <div
                 className="w-full h-48 rounded-xl mb-4 flex items-center justify-center
-                           bg-almostwhite border-2 border-solid border-almostblack">
+                           bg-almostwhite border-2 border-solid border-darkgreen">
                 <img
                   src={turf.image}
                   alt={turf.name}
-                  className="w-full h-full object-cover object-bottom"
+                  className="w-full h-full object-cover object-bottom rounded-xl"
                 />
               </div>
 
@@ -396,7 +438,7 @@ export default function TurFindPage() {
                       src={YellowStarIcon}
                       className="w-5"
                     />
-                    <span className="font-redhatmono text-sm font-medium text-almostblack">
+                    <span className="font-redhatmono text-xs font-medium text-almostblack">
                       {turf.rating}
                     </span>
                   </div>

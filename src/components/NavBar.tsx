@@ -6,7 +6,8 @@ import cal from "../assets/icons/calendar.svg";
 import profile from "../assets/icons/profile.svg";
 import menu from "../assets/icons/menu.svg";
 import DropdownMenu from "./navcomponents/DropDownMenu";
-import Login from "./navcomponents/Login";
+import Login from "./navcomponents/authcomponents/Login";
+import SignUp from "./navcomponents/authcomponents/SignUp";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
@@ -19,6 +20,7 @@ export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const navbarRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLImageElement | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
@@ -71,14 +73,18 @@ export default function NavBar() {
   // use this to toggle open/close profile
   const toggleProfile = (): void => {
     setIsProfileOpen(!isProfileOpen);
+    setMode("login");
   };
 
   const handleProfileClick = (): void => {
     setIsProfileOpen(!isProfileOpen);
     if (isMenuOpen) setIsMenuOpen(false);
+    setMode("login");
   };
 
   const handleLogin = (): void => {};
+
+  const handleSignup = (): void => {};
 
   const handleMenuItemClick = (path: string): void => {
     navigate(path);
@@ -109,11 +115,29 @@ export default function NavBar() {
         handleMenuItemClick={handleMenuItemClick}
       />
       {/* login page from the side */}
-      <Login
-        isProfileOpen={isProfileOpen}
-        toggleProfile={toggleProfile}
-        handleLogin={handleLogin}
-      />
+      {mode === "login" && (
+        <Login
+          isProfileOpen={isProfileOpen}
+          toggleProfile={toggleProfile}
+          handleLogin={handleLogin}
+          OnClickingSignUp={() => {
+            setMode("signup");
+            setIsProfileOpen(true);
+          }}
+        />
+      )}
+
+      {mode === "signup" && (
+        <SignUp
+          isProfileOpen={isProfileOpen}
+          toggleProfile={toggleProfile}
+          handleSignUp={handleSignup}
+          OnClickingLogin={() => {
+            setMode("login");
+            setIsProfileOpen(true);
+          }}
+        />
+      )}
 
       <Calendar
         isOpen={isCalendarOpen}
@@ -122,7 +146,7 @@ export default function NavBar() {
         bookings={sampleBookings}
       />
 
-      <CommandSearch />
+      {/* <CommandSearch /> */}
       {/* navbar code */}
       <div
         ref={navbarRef}
