@@ -117,7 +117,7 @@ export default function Games() {
     },
   ];
   return (
-    <div className="min-h-screen bg-almostblack text-neutral-100">
+    <div className="min-h-screen bg-black text-neutral-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         <Header />
 

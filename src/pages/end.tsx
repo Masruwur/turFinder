@@ -1,6 +1,5 @@
 "use client";
 import { BanknoteArrowUp, ArrowUpRight } from "lucide-react";
-import team from "../assets/dummy-team.jpeg";
 import depto from "../assets/depto.jpeg";
 import mas from "../assets/mas.jpeg";
 import mhr from "../assets/mhr.jpeg";
@@ -65,17 +64,19 @@ export default function EndPage() {
             </div>
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black font-polysans leading-tight">
               Connecting people through{" "}
-              <span className="bg-gradient-to-r from-green-900 to-green-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-green-900 to-green-700 bg-clip-text text-transparent">
                 football
               </span>
             </h1>
             <p className="text-lg text-gray-400 font-redhatmono leading-relaxed max-w-lg">
               Three sleep-deprived sport loving developers from across the globe
-              came together to revolutionize how people find and connect through
-              this beautiful game. Ever since we left our country to study
-              abroad we noticed that our friends were struggling to find players
-              to fill up our spots. That's how i came up with turFinder and my
-              friends Maheer and Masroor is making that dream come true.
+              came together to revolutionize how people{" "}
+              <span className="text-yellow">find</span> and{" "}
+              <span className="text-yellow">connect</span> through this
+              beautiful game. Ever since we left our country to study abroad we
+              noticed that our friends were struggling to find players to fill
+              up our spots. That's how i came up with turFinder and my friends
+              Maheer and Masroor are making that dream come true.
             </p>
           </div>
 
@@ -137,11 +138,13 @@ export default function EndPage() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 
+                rounded-lg text-white placeholder:text-gray-400 focus:outline-none 
+                focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-yellow text-white font-semibold rounded-lg hover:from-red-600 hover:to-orange-600 transition-all duration-200 flex items-center justify-center space-x-2">
+                className="px-6 py-3 bg-yellow text-white font-semibold rounded-lg hover:from-red-600 hover:to-orange-600 transition-all cursor-pointer duration-200 flex items-center justify-center space-x-2">
                 <span>Join Waitlist</span>
                 <ArrowUpRight className="w-4 h-4" />
               </button>
