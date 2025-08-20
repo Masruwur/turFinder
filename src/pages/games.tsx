@@ -160,25 +160,72 @@ function Header({
   setSearchTerm: (term: string) => void;
   searchRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+
   return (
     <div
       ref={searchRef}
-      className="mb-8">
-      <div className="relative max-w-lg ml-auto">
-        {/* Search icon positioned absolutely inside input */}
+      className="mb-3">
+      {/* Desktop search bar */}
+      <div className="hidden md:block relative w-2/3 ml-auto">
         <img
           src={SearchIcon}
           className="absolute left-4 top-1/2 transform -translate-y-1/2 w-7"
         />
         <input
           type="text"
-          placeholder="Search for a turf"
+          placeholder="find games now"
           value={searchTerm}
           onChange={(input) => setSearchTerm(input.target.value)}
-          className="w-full pl-13 pr-4 py-4 text-lg rounded-2xl transition-colors duration-300
+          className="w-full pl-13 pr-4 py-4 text-md rounded-2xl
                          bg-gray-700 focus:outline-none focus:ring-2
                          font-redhatmono text-white"
         />
+      </div>
+
+      {/* Mobile search widget */}
+      <div className="md:hidden flex justify-end">
+        {!isSearchExpanded ? (
+          /* Search icon button */
+          <button
+            onClick={() => setIsSearchExpanded(true)}
+            className="p-3 bg-gray-700 rounded-2xl hover:bg-gray-600 transition-colors duration-500">
+            <img
+              src={SearchIcon}
+              className="w-6 h-6"
+              alt="Search"
+            />
+          </button>
+        ) : (
+          /* Expanded search input */
+          <div className="relative w-full">
+            <img
+              src={SearchIcon}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6"
+            />
+            <input
+              type="text"
+              placeholder="find games now"
+              value={searchTerm}
+              onChange={(input) => setSearchTerm(input.target.value)}
+              onBlur={() => {
+                if (!searchTerm) setIsSearchExpanded(false);
+              }}
+              autoFocus
+              className="w-full pl-12 pr-12 py-3 text-md rounded-2xl
+                           bg-gray-700 focus:outline-none focus:ring-2
+                           font-redhatmono text-white"
+            />
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setIsSearchExpanded(false);
+              }}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
+              ✕
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -188,29 +235,31 @@ function ProfileCard() {
   const [following, setFollowing] = useState(false);
 
   return (
-    <div className="rounded-3xl border border-neutral-800 bg-neutral-900/60 p-4 sm:p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-      <div className="overflow-hidden rounded-2xl">
-        <img
-          src={depto}
-          alt="Profile"
-          className="h-56 w-full object-cover sm:h-72"
-        />
-      </div>
-
-      <div className="mt-4 sm:mt-6">
-        <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold">Rawnak Hossain</h2>
-          <BadgeCheck className="fill-white text-black" />
+    <div
+      className="rounded-3xl border border-neutral-800 bg-neutral-900/60 
+    p-4 sm:p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
+      <div className="flex gap-4">
+        <div className="overflow-hidden rounded-2xl flex-shrink-0 items-center">
+          <img
+            src={depto}
+            alt="Profile"
+            className="w-20 h-20 rounded-2xl object-cover"
+          />
         </div>
-        <p className="mt-1 text-neutral-400 font-redhatmono">CDM</p>
-        <p className="mt-1 text-neutral-400 font-redhatmono">Toxic Pants</p>
-
-        <div className="mt-5 flex items-center gap-3">
-          <button
-            onClick={() => setFollowing((f) => !f)}
-            className="flex-1 rounded-2xl bg-white text-neutral-900 px-4 py-2.5 font-medium hover:opacity-90 active:opacity-80">
-            {following ? "Following" : "Follow"} <span aria-hidden>＋</span>
-          </button>
+        <div className="flex-1">
+          <div className="items-center">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold">Rawnak Hossain</h2>
+              <BadgeCheck className="fill-white text-black w-4 h-4" />
+            </div>
+            <p className=" text-neutral-400 font-redhatmono text-sm">CDM</p>
+            <p className="text-neutral-400 font-redhatmono text-sm">
+              Toxic Pants
+            </p>
+            <div className="font-redhatmono text-sm text-yellow pt-0.5">
+              <span className="text-white">4</span> games played
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -220,12 +269,20 @@ function ProfileCard() {
 function GalleryGrid({ turfs }: { turfs: SlotCardData[] }) {
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button className="rounded-xl border border-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800">
+      <div className="mb-4 flex justify-between items-center">
+        <div className="flex gap-2 font-redhatmono ml-auto">
+          <button
+            className="rounded-xl border border-neutral-800 px-3 
+          py-1.5 text-sm text-neutral-300 hover:bg-neutral-800
+          active:bg-green/55 transition-all duration-200
+          ">
             slots
           </button>
-          <button className="rounded-xl border border-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800">
+          <button
+            className="rounded-xl border border-neutral-800 px-3 py-1.5 
+          text-sm text-neutral-300 hover:bg-neutral-800
+          active:bg-green/55 transition-all duration-200
+          ">
             price
           </button>
         </div>
@@ -254,19 +311,46 @@ function SlotCard({ turf }: { turf: SlotCardData }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/70 via-transparent to-transparent" />
         <div className="absolute bottom-0 w-full p-4">
-          <h4 className="text-base font-semibold text-white drop-shadow">
+          <h4 className="font-polysans text-md font-bold text-white">
             {turf.name}
           </h4>
-          <p className="text-xs text-neutral-300">
+          <p className="text-xs text-neutral-300 font-redhatmono">
             {turf.location} • {turf.distance}
           </p>
         </div>
       </div>
-      <div className="flex items-center justify-between px-4 py-3 text-sm text-neutral-300">
-        <span className="inline-flex items-center gap-2">৳ {turf.price}</span>
-        <span className="rounded-lg border border-neutral-800 px-3 py-1 hover:bg-neutral-800">
-          {turf.slot}
-        </span>
+      <div className="flex items-center justify-between p-3">
+        <div className="font-polysans text-md font-bold text-white">
+          &#2547;{turf.price}
+          <span className="font-redhatmono text-sm font-normal text-yellow">
+            /hour
+          </span>
+        </div>
+
+        {/* Slot Progress Bar */}
+        <div className="flex items-center gap-2">
+          <div className="w-16 h-2 bg-neutral-700 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-300 ${(() => {
+                const [filled, total] = turf.slot.split("/").map(Number);
+                const percentage = (filled / total) * 100;
+
+                if (percentage <= 50) return "bg-green-500";
+                if (percentage <= 75) return "bg-yellow-500";
+                return "bg-red-500";
+              })()}`}
+              style={{
+                width: `${(() => {
+                  const [filled, total] = turf.slot.split("/").map(Number);
+                  return (filled / total) * 100;
+                })()}%`,
+              }}
+            />
+          </div>
+          <span className="text-xs font-redhatmono text-neutral-400">
+            {turf.slot}
+          </span>
+        </div>
       </div>
     </article>
   );
