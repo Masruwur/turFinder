@@ -116,7 +116,9 @@ const mockTurfs: SlotCardData[] = [
 
 export default function Games() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   // Filter turfs based on search term
   const filteredTurfs = mockTurfs.filter(
@@ -126,17 +128,33 @@ export default function Games() {
   );
 
   return (
-    <div className="min-h-screen bg-black text-neutral-100">
+    <div className="min-h-screen bg-black text-neutral-100 mb-10">
+      <NavBar />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-        <Header
-          turfs={mockTurfs}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          searchRef={searchRef}
-        />
+        {/* Header row with title and search */}
+        <div className="flex items-center justify-between mb-6 ml-2 gap-2">
+          <h1
+            ref={titleRef}
+            className={`font-polysans font-bold text-yellow tracking-tight transition-all 
+              duration-300 ease-in-out transform origin-left ${
+                isSearchExpanded ? "scale-80  text-md" : "scale-100  text-3xl"
+              } whitespace-nowrap overflow-hidden`}>
+            FIND GAMES!
+          </h1>
 
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
-          <aside className="order-1 lg:order-none lg:sticky lg:top-6">
+          <Header
+            turfs={mockTurfs}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            searchRef={searchRef}
+            titleRef={titleRef}
+            isSearchExpanded={isSearchExpanded}
+            setIsSearchExpanded={setIsSearchExpanded}
+          />
+        </div>
+
+        <div className="mt-5 flex flex-col lg:flex-row gap-6">
+          <aside className="order-1 lg:order-none lg:sticky lg:top-6 lg:w-[300px] lg:flex-shrink-0">
             <ProfileCard />
           </aside>
 
@@ -154,20 +172,24 @@ function Header({
   searchTerm,
   setSearchTerm,
   searchRef,
+  titleRef,
+  isSearchExpanded,
+  setIsSearchExpanded,
 }: {
   turfs: SlotCardData[];
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   searchRef: React.RefObject<HTMLDivElement | null>;
+  titleRef: React.RefObject<HTMLHeadingElement | null>;
+  isSearchExpanded: boolean;
+  setIsSearchExpanded: (expanded: boolean) => void;
 }) {
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-
   return (
     <div
       ref={searchRef}
-      className="mb-3">
+      className="flex items-center">
       {/* Desktop search bar */}
-      <div className="hidden md:block relative w-2/3 ml-auto">
+      <div className="hidden md:block relative w-80">
         <img
           src={SearchIcon}
           className="absolute left-4 top-1/2 transform -translate-y-1/2 w-7"
@@ -183,49 +205,55 @@ function Header({
         />
       </div>
 
-      {/* Mobile search widget */}
-      <div className="md:hidden flex justify-end">
-        {!isSearchExpanded ? (
-          /* Search icon button */
-          <button
-            onClick={() => setIsSearchExpanded(true)}
-            className="p-3 bg-gray-700 rounded-2xl hover:bg-gray-600 transition-colors duration-500">
-            <img
-              src={SearchIcon}
-              className="w-6 h-6"
-              alt="Search"
-            />
-          </button>
-        ) : (
-          /* Expanded search input */
-          <div className="relative w-full">
-            <img
-              src={SearchIcon}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6"
-            />
-            <input
-              type="text"
-              placeholder="find games now"
-              value={searchTerm}
-              onChange={(input) => setSearchTerm(input.target.value)}
-              onBlur={() => {
-                if (!searchTerm) setIsSearchExpanded(false);
-              }}
-              autoFocus
-              className="w-full pl-12 pr-12 py-3 text-md rounded-2xl
-                           bg-gray-700 focus:outline-none focus:ring-2
-                           font-redhatmono text-white"
-            />
-            <button
-              onClick={() => {
-                setSearchTerm("");
-                setIsSearchExpanded(false);
-              }}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
-              ✕
-            </button>
+      {/* Mobile search - responsive and mobile-first */}
+      <div className="md:hidden">
+        <div
+          className={`relative transition-all duration-300 ease-out ${
+            isSearchExpanded ? "" : "w-12"
+          }`}>
+          <div className="relative h-12 bg-darkgreen rounded-2xl">
+            {/* Search icon */}
+            <div
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer"
+              onClick={() => !isSearchExpanded && setIsSearchExpanded(true)}>
+              <img
+                src={SearchIcon}
+                className="w-6 h-6"
+                alt="Search"
+              />
+            </div>
+
+            {/* Search input */}
+            {isSearchExpanded && (
+              <input
+                type="text"
+                placeholder="find games now"
+                value={searchTerm}
+                onChange={(input) => setSearchTerm(input.target.value)}
+                onBlur={() => {
+                  if (!searchTerm) setIsSearchExpanded(false);
+                }}
+                autoFocus
+                className="w-full h-full pl-12 pr-10 bg-transparent rounded-2xl
+                         focus:outline-none focus:ring-2 focus:ring-gray-500
+                         font-redhatmono text-white text-sm"
+              />
+            )}
+
+            {/* Close button */}
+            {isSearchExpanded && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setIsSearchExpanded(false);
+                }}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 
+                         text-gray-400 hover:text-white text-lg">
+                ×
+              </button>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -284,6 +312,13 @@ function GalleryGrid({ turfs }: { turfs: SlotCardData[] }) {
           active:bg-green/55 transition-all duration-200
           ">
             price
+          </button>
+          <button
+            className="rounded-xl border border-neutral-800 px-3 py-1.5 
+          text-sm text-neutral-300 hover:bg-neutral-800
+          active:bg-green/55 transition-all duration-200
+          ">
+            distance
           </button>
         </div>
       </div>
