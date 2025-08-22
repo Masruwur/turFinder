@@ -469,11 +469,12 @@ export default function TurFindPage() {
                     </span>
                   </div>
 
-                  {/* Book now button - add your booking logic here */}
+                  {/* Book now button - navigate to payment */}
                   <button
+                    onClick={() => (window.location.href = "/payment")}
                     className="px-6 py-2 font-medium rounded-xl transition-colors duration-300
-                               bg-green font-redhatmono text-almostwhite cursor-pointer
-                               hover:bg-darkgreen active:bg-darkgreen/80">
+                           bg-green font-redhatmono text-almostwhite cursor-pointer
+                           hover:bg-darkgreen active:bg-darkgreen/80">
                     Book Now
                   </button>
                 </div>
