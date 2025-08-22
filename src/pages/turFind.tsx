@@ -517,8 +517,10 @@ export default function TurFindPage() {
                     </span>
                   </div>
 
+
                   {/* Book now button */}
                   <button
+                    onClick={() => (window.location.href = "/payment")}
                     className={`font-medium rounded-lg sm:rounded-xl transition-colors duration-300
                                bg-green font-redhatmono text-almostwhite cursor-pointer
                                hover:bg-darkgreen active:bg-darkgreen/80 flex-shrink-0
@@ -527,6 +529,7 @@ export default function TurFindPage() {
                                    ? "px-4 py-2 sm:px-6 text-sm sm:text-base"
                                    : "px-3 py-1 sm:px-6 sm:py-2 lg:px-8 lg:py-3 text-xs sm:text-base lg:text-lg"
                                }`}>
+
                     Book Now
                   </button>
                 </div>
