@@ -205,7 +205,7 @@ export default function TurFindPage() {
 
   // ===== COMPONENT RENDER =====
   return (
-    <div className="w-full min-h-screen bg-green-800 px-10 md:px-20 lg:px-30 py-20 relative">
+    <div className="w-full min-h-screen bg-green-800 px-10 md:px-25 lg:px-40 py-25 relative overflow-hidden">
       {/* ===== BACKGROUND GRID ===== */}
       <div
         style={{
@@ -222,8 +222,8 @@ export default function TurFindPage() {
         {/* ===== PAGE HEADER ===== */}
         <h1
           ref={titleRef}
-          className="font-polysans text-7xl font-bold text-almostwhite mb-8 mt-10 tracking-tight relative">
-          BOOK YOUR TURF!
+          className="font-polysans text-7xl font-bold text-almostwhite mb-8 tracking-tight relative">
+          BOOK A TURF!
         </h1>
 
         {/* ===== SEARCH SECTION ===== */}
@@ -241,8 +241,8 @@ export default function TurFindPage() {
               placeholder="Search for a turf"
               value={searchTerm}
               onChange={(input) => setSearchTerm(input.target.value)}
-              className="w-full pl-13 pr-4 py-4 text-lg rounded-2xl transition-colors duration-300
-                         bg-beige focus:outline-none focus:ring-2
+              className="w-full pl-13 pr-4 py-4 text-lg rounded-2xl transition-colors duration-300 tracking-tight
+                         bg-almostwhite focus:outline-none focus:ring-2
                          font-redhatmono text-almostblack"
             />
           </div>
@@ -251,30 +251,30 @@ export default function TurFindPage() {
         {/* ===== CONTROLS SECTION ===== */}
         <div
           ref={controlsRef}
-          className="flex items-center justify-between mb-8 flex-wrap gap-4 relative">
-          <div className="flex items-center gap-4">
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4 relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             {/* ===== VIEW TOGGLE BUTTONS ===== */}
             <div className="flex rounded-xl p-1 bg-yellow">
               {/* Grid view button */}
               <button
                 onClick={handleViewToggle}
-                className={`p-3 rounded-lg transition-all duration-300 cursor-pointer
+                className={`p-2 sm:p-3 rounded-lg transition-all duration-300 cursor-pointer
                           ${isGridView ? "bg-almostwhite" : "bg-transparent"}`}>
                 <img
                   src={GridIcon}
-                  className="w-5"
+                  className="w-4 sm:w-5"
                 />
               </button>
               {/* List view button */}
               <button
                 onClick={handleViewToggle}
-                className={`p-3 rounded-lg transition-all duration-300 cursor-pointer
+                className={`p-2 sm:p-3 rounded-lg transition-all duration-300 cursor-pointer
                           ${
                             !isGridView ? "bg-almostwhite" : "bg-transparent"
                           }`}>
                 <img
                   src={ListIcon}
-                  className="w-5"
+                  className="w-4 sm:w-5"
                 />
               </button>
             </div>
@@ -283,9 +283,9 @@ export default function TurFindPage() {
             <div className="relative">
               <button
                 onClick={() => setShowSortDropdown(!showSortDropdown)}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors duration-300 cursor-pointer
+                className="flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-colors duration-300 cursor-pointer
                            bg-almostwhite hover:bg-yellow
-                           font-redhatmono text-almost">
+                           font-redhatmono text-almostblack">
                 Sort By:{" "}
                 {sortOptions.find((opt) => opt.value === sortBy)?.label}
                 <img
@@ -300,7 +300,7 @@ export default function TurFindPage() {
               {showSortDropdown && (
                 <div
                   ref={sortDropdownRef}
-                  className="absolute top-full left-0 mt-2 w-67 rounded-xl shadow-lg z-50
+                  className="absolute top-full left-0 mt-2 w-65 rounded-xl shadow-lg z-50
                              bg-almostwhite">
                   {sortOptions.map((option, index) => (
                     <button
@@ -309,7 +309,7 @@ export default function TurFindPage() {
                         setSortBy(option.value);
                         setShowSortDropdown(false);
                       }}
-                      className={`w-full text-left px-4 py-3 transition-colors duration-200 
+                      className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 transition-colors duration-200 
                                   font-redhatmono text-almostblack cursor-pointer
                                   ${
                                     sortBy === option.value
@@ -334,12 +334,12 @@ export default function TurFindPage() {
             <div className="relative">
               <button
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-colors duration-300 cursor-pointer
+                className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-3 rounded-xl font-medium transition-colors duration-300 cursor-pointer
                            bg-lightgreen hover:bg-darkgreen hover:text-almostwhite
                            font-redhatmono text-almostblack">
                 <img
                   src={FilterIcon}
-                  className="w-6"
+                  className="w-5 sm:w-6"
                 />
                 Filters
               </button>
@@ -348,7 +348,7 @@ export default function TurFindPage() {
               {showFilterDropdown && (
                 <div
                   ref={filterDropdownRef}
-                  className="absolute top-full left-0 mt-2 w-70 rounded-xl shadow-lg z-50 p-4
+                  className="absolute top-full left-0 mt-2 w-65 rounded-xl shadow-lg z-50 p-4
                              bg-almostwhite border-2 border-solid border-almostblack">
                   <div className="space-y-4">
                     {/* Price range filter */}
@@ -402,79 +402,134 @@ export default function TurFindPage() {
         <div
           ref={cardsRef}
           className={`grid border-2 border-almostblack relative
-                      ${
-                        isGridView
-                          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" // Grid layout
-                          : "grid-cols-1" // List layout
-                      }`}>
+              ${
+                isGridView
+                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" // Grid layout
+                  : "grid-cols-1" // List layout
+              }`}>
           {filteredTurfs.map((turf) => (
             <div
               key={turf.id}
-              className="turf-card p-6 cursor-pointer transition-shadow duration-300 hover:shadow-lg
-                         bg-almostwhite border-1 border-almostblack"
+              className={`turf-card cursor-pointer transition-shadow duration-300 hover:shadow-lg
+                 bg-almostwhite border-1 border-almostblack
+                 ${
+                   isGridView
+                     ? "p-4 sm:p-6 lg:p-8"
+                     : "flex p-3 sm:p-6 lg:p-8 overflow-hidden"
+                 }`}
               onMouseEnter={handleCardHover}
               onMouseLeave={handleCardLeave}>
-              {/* ===== TURF IMAGE PLACEHOLDER ===== */}
-              {/* Replace this section with actual images when available */}
+              {/* ===== TURF IMAGE ===== */}
               <div
-                className="w-full h-48 rounded-xl mb-4 flex items-center justify-center
-                           bg-almostwhite border-2 border-solid border-darkgreen">
+                className={`flex items-center justify-center border-2 border-solid border-darkgreen
+                   ${
+                     isGridView
+                       ? "w-full h-40 sm:h-48 mb-4 bg-almostwhite"
+                       : "w-2/5 sm:w-1/3 h-32 sm:h-48 lg:min-h-[200px] mr-3 sm:mr-6 bg-almostwhite flex-shrink-0"
+                   }`}>
                 <img
                   src={turf.image}
                   alt={turf.name}
-                  className="w-full h-full object-cover object-bottom rounded-xl"
+                  className="w-full h-full object-cover object-bottom"
                 />
               </div>
 
               {/* ===== TURF INFORMATION ===== */}
-              <div className="space-y-3">
-                {/* Turf name and rating */}
-                <div className="flex justify-between items-start">
-                  <h3 className="font-polysans text-xl font-bold text-almostblack">
-                    {turf.name}
-                  </h3>
-                  <div className="flex items-center gap-1">
+              <div
+                className={`${
+                  isGridView
+                    ? "space-y-3"
+                    : "flex-1 flex flex-col justify-between min-w-0"
+                }`}>
+                <div
+                  className={`${isGridView ? "" : "space-y-1 sm:space-y-3"}`}>
+                  {/* Turf name and rating */}
+                  <div className="flex justify-between items-start gap-1 sm:gap-2">
+                    <h3
+                      className={`font-polysans font-bold text-almostblack leading-tight truncate
+                               ${
+                                 isGridView
+                                   ? "text-lg sm:text-xl"
+                                   : "text-sm sm:text-xl lg:text-2xl"
+                               }`}>
+                      {turf.name}
+                    </h3>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <img
+                        src={YellowStarIcon}
+                        className="w-3 sm:w-4 lg:w-5"
+                      />
+                      <span className="font-redhatmono text-xs font-medium text-almostblack">
+                        {turf.rating}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <img
-                      src={YellowStarIcon}
-                      className="w-5"
+                      src={MapPinIcon}
+                      className="w-3 sm:w-4 lg:w-5 -ml-1 flex-shrink-0"
                     />
-                    <span className="font-redhatmono text-xs font-medium text-almostblack">
-                      {turf.rating}
+                    <span
+                      className={`font-redhatmono text-almostblack/80 truncate
+                               ${
+                                 isGridView
+                                   ? "text-xs sm:text-sm"
+                                   : "text-xs sm:text-sm lg:text-base"
+                               }`}>
+                      {turf.location}
                     </span>
+                  </div>
+
+                  {/* Distance */}
+                  <div
+                    className={`font-redhatmono text-almostblack/60
+                              ${
+                                isGridView
+                                  ? "text-xs sm:text-sm"
+                                  : "block text-xs sm:text-sm lg:text-base"
+                              }`}>
+                    {turf.distance}
                   </div>
                 </div>
 
-                {/* Location */}
-                <div className="flex items-center gap-2">
-                  <img
-                    src={MapPinIcon}
-                    className="w-5 -ml-1"
-                  />
-                  <span className="font-redhatmono text-sm text-almostblack/80">
-                    {turf.location}
-                  </span>
-                </div>
-
-                {/* Distance */}
-                <div className="font-redhatmono text-sm text-almostblack/60">
-                  {turf.distance}
-                </div>
-
                 {/* Price and booking button */}
-                <div className="flex justify-between items-center pt-2">
-                  <div className="font-polysans text-2xl font-bold text-almostblack">
+                <div
+                  className={`flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2 sm:gap-0
+                            ${isGridView ? "pt-2" : "pt-2 sm:pt-3 lg:pt-4"}`}>
+                  <div
+                    className={`font-polysans font-bold text-almostblack
+                              ${
+                                isGridView
+                                  ? "text-xl sm:text-2xl"
+                                  : "text-lg sm:text-2xl lg:text-3xl"
+                              }`}>
                     &#2547;{turf.price}
-                    <span className="font-redhatmono text-sm font-normal text-almostblack/80">
+                    <span
+                      className={`font-redhatmono font-normal text-almostblack/80
+                               ${
+                                 isGridView
+                                   ? "text-xs sm:text-sm"
+                                   : "text-xs sm:text-sm lg:text-base"
+                               }`}>
                       /hour
                     </span>
                   </div>
 
-                  {/* Book now button - navigate to payment */}
+
+                  {/* Book now button */}
                   <button
                     onClick={() => (window.location.href = "/payment")}
-                    className="px-6 py-2 font-medium rounded-xl transition-colors duration-300
-                           bg-green font-redhatmono text-almostwhite cursor-pointer
-                           hover:bg-darkgreen active:bg-darkgreen/80">
+                    className={`font-medium rounded-lg sm:rounded-xl transition-colors duration-300
+                               bg-green font-redhatmono text-almostwhite cursor-pointer
+                               hover:bg-darkgreen active:bg-darkgreen/80 flex-shrink-0
+                               ${
+                                 isGridView
+                                   ? "px-4 py-2 sm:px-6 text-sm sm:text-base"
+                                   : "px-3 py-1 sm:px-6 sm:py-2 lg:px-8 lg:py-3 text-xs sm:text-base lg:text-lg"
+                               }`}>
+
                     Book Now
                   </button>
                 </div>

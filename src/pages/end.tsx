@@ -122,7 +122,7 @@ export default function EndPage() {
           </div>
 
           {/* CTA Section */}
-          <div className="space-y-4 pt-6">
+          <div className="space-y-4 pt-6 pb-20">
             <div className="text-center lg:text-left">
               <div className="text-2xl lg:text-3xl font-bold text-white mb-2">
                 LAUNCHING FALL 2025!
