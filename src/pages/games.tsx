@@ -128,14 +128,24 @@ export default function Games() {
   );
 
   return (
-    <div className="min-h-screen bg-black text-neutral-100 mb-10">
+    <div className="min-h-screen bg-green-800 px-5 py-25 text-neutral-100">
+      <div
+        style={{
+          position: "fixed",
+          inset: -1,
+          zIndex: 0,
+          backgroundImage:
+            "repeating-linear-gradient(to right, #262626 0px, #262626 1px, transparent 1px, transparent 100px), repeating-linear-gradient(to bottom, #262626 0px, #262626 1px, transparent 1px, transparent 100px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
       <NavBar />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         {/* Header row with title and search */}
         <div className="flex items-center justify-between mb-6 ml-2 gap-2">
           <h1
             ref={titleRef}
-            className={`font-polysans font-bold text-yellow tracking-tight transition-all 
+            className={`font-polysans font-bold text-white tracking-tight transition-all 
               duration-300 ease-in-out transform origin-left ${
                 isSearchExpanded ? "scale-80  text-md" : "scale-100  text-3xl"
               } whitespace-nowrap overflow-hidden`}>
@@ -158,7 +168,7 @@ export default function Games() {
             <ProfileCard />
           </aside>
 
-          <main className="order-2">
+          <main className="order-2 z-5">
             <GalleryGrid turfs={filteredTurfs} />
           </main>
         </div>
@@ -264,8 +274,9 @@ function ProfileCard() {
 
   return (
     <div
-      className="rounded-3xl border border-neutral-800 bg-neutral-900/60 
-    p-4 sm:p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
+      className="rounded-3xl border border-neutral-800 bg-neutral-900
+      relative z-10
+      p-4 sm:p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
       <div className="flex gap-4">
         <div className="overflow-hidden rounded-2xl flex-shrink-0 items-center">
           <img
@@ -337,15 +348,19 @@ function GalleryGrid({ turfs }: { turfs: SlotCardData[] }) {
 
 function SlotCard({ turf }: { turf: SlotCardData }) {
   return (
-    <article className="group overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/60">
-      <div className="relative aspect-[16/10] w-full overflow-hidden">
+    <article className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 relative z-10">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
         <img
           src={turf.image}
           alt={turf.name}
           className="h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/70 via-transparent to-transparent" />
-        <div className="absolute bottom-0 w-full p-4">
+      </div>
+
+      {/* Card content section */}
+      <div className="p-4 space-y-2">
+        {/* Title and location */}
+        <div>
           <h4 className="font-polysans text-md font-bold text-white">
             {turf.name}
           </h4>
@@ -353,38 +368,40 @@ function SlotCard({ turf }: { turf: SlotCardData }) {
             {turf.location} • {turf.distance}
           </p>
         </div>
-      </div>
-      <div className="flex items-center justify-between p-3">
-        <div className="font-polysans text-md font-bold text-white">
-          &#2547;{turf.price}
-          <span className="font-redhatmono text-sm font-normal text-yellow">
-            /hour
-          </span>
-        </div>
 
-        {/* Slot Progress Bar */}
-        <div className="flex items-center gap-2">
-          <div className="w-16 h-2 bg-neutral-700 rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all duration-300 ${(() => {
-                const [filled, total] = turf.slot.split("/").map(Number);
-                const percentage = (filled / total) * 100;
-
-                if (percentage <= 50) return "bg-green-500";
-                if (percentage <= 75) return "bg-yellow-500";
-                return "bg-red-500";
-              })()}`}
-              style={{
-                width: `${(() => {
-                  const [filled, total] = turf.slot.split("/").map(Number);
-                  return (filled / total) * 100;
-                })()}%`,
-              }}
-            />
+        {/* Price and slot info */}
+        <div className="flex items-center justify-between">
+          <div className="font-polysans text-md font-bold text-white">
+            &#2547;{turf.price}
+            <span className="font-redhatmono text-sm font-normal text-yellow">
+              /hour
+            </span>
           </div>
-          <span className="text-xs font-redhatmono text-neutral-400">
-            {turf.slot}
-          </span>
+
+          {/* Slot Progress Bar */}
+          <div className="flex items-center gap-2">
+            <div className="w-16 h-2 bg-neutral-700 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 ${(() => {
+                  const [filled, total] = turf.slot.split("/").map(Number);
+                  const percentage = (filled / total) * 100;
+
+                  if (percentage <= 50) return "bg-green-500";
+                  if (percentage <= 75) return "bg-yellow-500";
+                  return "bg-red-500";
+                })()}`}
+                style={{
+                  width: `${(() => {
+                    const [filled, total] = turf.slot.split("/").map(Number);
+                    return (filled / total) * 100;
+                  })()}%`,
+                }}
+              />
+            </div>
+            <span className="text-xs font-redhatmono text-neutral-400">
+              {turf.slot}
+            </span>
+          </div>
         </div>
       </div>
     </article>

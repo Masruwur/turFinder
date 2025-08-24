@@ -30,7 +30,6 @@ interface TurfCard {
 export default function TurFindPage() {
   // ===== STATE MANAGEMENT =====
   const [searchTerm, setSearchTerm] = useState(""); // User's search input
-  const [isGridView, setIsGridView] = useState(true); // Toggle between grid and list view
   const [sortBy, setSortBy] = useState("recommended"); // Current sort option
   const [showSortDropdown, setShowSortDropdown] = useState(false); // Sort dropdown visibility
   const [showFilterDropdown, setShowFilterDropdown] = useState(false); // Filter dropdown visibility
@@ -162,19 +161,6 @@ export default function TurFindPage() {
 
   // ===== EVENT HANDLERS =====
 
-  // Handle view toggle between grid and list layout
-  const handleViewToggle = () => {
-    setIsGridView(!isGridView);
-    // Animate cards when view changes
-    gsap.from(".turf-card", {
-      scale: 0.9, // Start slightly smaller
-      opacity: 1,
-      duration: 0.3,
-      stagger: 0.05, // Quick stagger effect
-      ease: "power2.out",
-    });
-  };
-
   // Handle card hover animation - lift effect
   const handleCardHover = (e: MouseEvent) => {
     gsap.to(e.currentTarget, {
@@ -222,7 +208,7 @@ export default function TurFindPage() {
         {/* ===== PAGE HEADER ===== */}
         <h1
           ref={titleRef}
-          className="font-polysans text-7xl font-bold text-almostwhite mb-8 tracking-tight relative">
+          className="font-polysans text-5xl font-bold text-almostwhite mb-8 tracking-tight relative">
           BOOK A TURF!
         </h1>
 
@@ -253,32 +239,6 @@ export default function TurFindPage() {
           ref={controlsRef}
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4 relative">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-            {/* ===== VIEW TOGGLE BUTTONS ===== */}
-            <div className="flex rounded-xl p-1 bg-yellow">
-              {/* Grid view button */}
-              <button
-                onClick={handleViewToggle}
-                className={`p-2 sm:p-3 rounded-lg transition-all duration-300 cursor-pointer
-                          ${isGridView ? "bg-almostwhite" : "bg-transparent"}`}>
-                <img
-                  src={GridIcon}
-                  className="w-4 sm:w-5"
-                />
-              </button>
-              {/* List view button */}
-              <button
-                onClick={handleViewToggle}
-                className={`p-2 sm:p-3 rounded-lg transition-all duration-300 cursor-pointer
-                          ${
-                            !isGridView ? "bg-almostwhite" : "bg-transparent"
-                          }`}>
-                <img
-                  src={ListIcon}
-                  className="w-4 sm:w-5"
-                />
-              </button>
-            </div>
-
             {/* ===== SORT DROPDOWN ===== */}
             <div className="relative">
               <button
@@ -401,140 +361,64 @@ export default function TurFindPage() {
         {/* ===== TURF CARDS GRID ===== */}
         <div
           ref={cardsRef}
-          className={`grid border-2 border-almostblack relative
-              ${
-                isGridView
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" // Grid layout
-                  : "grid-cols-1" // List layout
-              }`}>
+          className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 relative z-10">
           {filteredTurfs.map((turf) => (
-            <div
+            <article
               key={turf.id}
-              className={`turf-card cursor-pointer transition-shadow duration-300 hover:shadow-lg
-                 bg-almostwhite border-1 border-almostblack
-                 ${
-                   isGridView
-                     ? "p-4 sm:p-6 lg:p-8"
-                     : "flex p-3 sm:p-6 lg:p-8 overflow-hidden"
-                 }`}
+              className="turf-card overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 cursor-pointer"
               onMouseEnter={handleCardHover}
               onMouseLeave={handleCardLeave}>
-              {/* ===== TURF IMAGE ===== */}
-              <div
-                className={`flex items-center justify-center border-2 border-solid border-darkgreen
-                   ${
-                     isGridView
-                       ? "w-full h-40 sm:h-48 mb-4 bg-almostwhite"
-                       : "w-2/5 sm:w-1/3 h-32 sm:h-48 lg:min-h-[200px] mr-3 sm:mr-6 bg-almostwhite flex-shrink-0"
-                   }`}>
+              <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
                 <img
                   src={turf.image}
                   alt={turf.name}
-                  className="w-full h-full object-cover object-bottom"
+                  className="h-full w-full object-cover"
                 />
               </div>
 
-              {/* ===== TURF INFORMATION ===== */}
-              <div
-                className={`${
-                  isGridView
-                    ? "space-y-3"
-                    : "flex-1 flex flex-col justify-between min-w-0"
-                }`}>
-                <div
-                  className={`${isGridView ? "" : "space-y-1 sm:space-y-3"}`}>
-                  {/* Turf name and rating */}
-                  <div className="flex justify-between items-start gap-1 sm:gap-2">
-                    <h3
-                      className={`font-polysans font-bold text-almostblack leading-tight truncate
-                               ${
-                                 isGridView
-                                   ? "text-lg sm:text-xl"
-                                   : "text-sm sm:text-xl lg:text-2xl"
-                               }`}>
+              {/* Card content section */}
+              <div className="p-4 space-y-2">
+                {/* Title and location */}
+                <div>
+                  <div className="flex justify-between items-start gap-2 mb-1">
+                    <h4 className="font-polysans text-md font-bold text-white">
                       {turf.name}
-                    </h3>
+                    </h4>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <img
                         src={YellowStarIcon}
-                        className="w-3 sm:w-4 lg:w-5"
+                        className="w-4 h-4"
                       />
-                      <span className="font-redhatmono text-xs font-medium text-almostblack">
+                      <span className="font-redhatmono text-xs font-medium text-white">
                         {turf.rating}
                       </span>
                     </div>
                   </div>
-
-                  {/* Location */}
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <img
-                      src={MapPinIcon}
-                      className="w-3 sm:w-4 lg:w-5 -ml-1 flex-shrink-0"
-                    />
-                    <span
-                      className={`font-redhatmono text-almostblack/80 truncate
-                               ${
-                                 isGridView
-                                   ? "text-xs sm:text-sm"
-                                   : "text-xs sm:text-sm lg:text-base"
-                               }`}>
-                      {turf.location}
-                    </span>
-                  </div>
-
-                  {/* Distance */}
-                  <div
-                    className={`font-redhatmono text-almostblack/60
-                              ${
-                                isGridView
-                                  ? "text-xs sm:text-sm"
-                                  : "block text-xs sm:text-sm lg:text-base"
-                              }`}>
-                    {turf.distance}
-                  </div>
+                  <p className="text-xs text-neutral-300 font-redhatmono">
+                    {turf.location} • {turf.distance}
+                  </p>
                 </div>
 
                 {/* Price and booking button */}
-                <div
-                  className={`flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2 sm:gap-0
-                            ${isGridView ? "pt-2" : "pt-2 sm:pt-3 lg:pt-4"}`}>
-                  <div
-                    className={`font-polysans font-bold text-almostblack
-                              ${
-                                isGridView
-                                  ? "text-xl sm:text-2xl"
-                                  : "text-lg sm:text-2xl lg:text-3xl"
-                              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="font-polysans text-md font-bold text-white">
                     &#2547;{turf.price}
-                    <span
-                      className={`font-redhatmono font-normal text-almostblack/80
-                               ${
-                                 isGridView
-                                   ? "text-xs sm:text-sm"
-                                   : "text-xs sm:text-sm lg:text-base"
-                               }`}>
+                    <span className="font-redhatmono text-sm font-normal text-yellow">
                       /hour
                     </span>
                   </div>
 
-
                   {/* Book now button */}
                   <button
                     onClick={() => (window.location.href = "/payment")}
-                    className={`font-medium rounded-lg sm:rounded-xl transition-colors duration-300
+                    className="px-4 py-2 font-medium rounded-lg transition-colors duration-300
                                bg-green font-redhatmono text-almostwhite cursor-pointer
-                               hover:bg-darkgreen active:bg-darkgreen/80 flex-shrink-0
-                               ${
-                                 isGridView
-                                   ? "px-4 py-2 sm:px-6 text-sm sm:text-base"
-                                   : "px-3 py-1 sm:px-6 sm:py-2 lg:px-8 lg:py-3 text-xs sm:text-base lg:text-lg"
-                               }`}>
-
+                               hover:bg-darkgreen active:bg-darkgreen/80 text-sm">
                     Book Now
                   </button>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
 
