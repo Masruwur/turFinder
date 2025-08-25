@@ -3,6 +3,7 @@ import HomePage from "./home";
 import TurFindPage from "./pages/turFind";
 import Games from "./pages/games";
 import Payment from "./pages/payment";
+import Slot from "./pages/slot";
 
 export default function App() {
   return (
@@ -23,6 +24,10 @@ export default function App() {
         <Route
           path="/payment"
           element={<Payment />}
+        />
+        <Route
+          path="/slot"
+          element={<Slot />}
         />
         {/* Add more routes here as you create new pages */}
         {/* Example: */}
