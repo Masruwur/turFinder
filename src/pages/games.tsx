@@ -1,5 +1,4 @@
-"useclient";
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import depto from "../assets/depto.jpeg";
 import { BadgeCheck } from "lucide-react";
 import ClubVolta from "../assets/turfs/clubvolta.png";

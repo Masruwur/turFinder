@@ -410,7 +410,7 @@ export default function TurFindPage() {
 
                   {/* Book now button */}
                   <button
-                    onClick={() => (window.location.href = "/payment")}
+                    onClick={() => (window.location.href = "/slot")}
                     className="px-4 py-2 font-medium rounded-lg transition-colors duration-300
                                bg-green font-redhatmono text-almostwhite cursor-pointer
                                hover:bg-darkgreen active:bg-darkgreen/80 text-sm">

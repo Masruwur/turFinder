@@ -1,4 +1,3 @@
-"use client";
 import { BanknoteArrowUp, ArrowUpRight } from "lucide-react";
 import depto from "../assets/depto.jpeg";
 import mas from "../assets/mas.jpeg";
