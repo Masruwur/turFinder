@@ -150,12 +150,12 @@ export default function NavBar() {
       {/* navbar code */}
       <div
         ref={navbarRef}
-        className="fixed bottom-10 md:top-0 left-1/2 transform -translate-x-1/2 drop-shadow-md z-20">
+        className="fixed bottom-10 md:top-0 left-1/2 transform -translate-x-1/2 drop-shadow-md z-20 pointer-events-none">
         <div
           className="flex bg-almostblack
                      h-15 sm:h-17.5 md:h-18
                      w-61 sm:w-71 md:w-81
-                     rounded-3xl md:rounded-t-none md:rounded-b-3xl">
+                     rounded-3xl md:rounded-t-none md:rounded-b-3xl pointer-events-auto">
           <img
             ref={logoRef}
             onClick={handleLogoClick}

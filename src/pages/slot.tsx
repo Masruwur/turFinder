@@ -10,6 +10,8 @@ import {
   User,
   Phone,
 } from "lucide-react";
+import NavBar from "../components/NavBar";
+import { mockTurfs, TurfData } from "../data/mockData";
 
 interface WeekDate {
   date: number;
@@ -31,12 +33,14 @@ interface SelectedSlot {
   slot: TimeSlot;
 }
 
+interface TurfCard extends TurfData {}
+
 type SlotAvailability = "available" | "booked" | "unavailable";
 
 export default function TurfBooking() {
   const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
-  const [selectedTurf, setSelectedTurf] = useState<string>("Turf A");
+  const [selectedTurf, setSelectedTurf] = useState<string>(mockTurfs[0].name);
 
   // Generate dates for current week
   const getWeekDates = (weekOffset: number = 0): WeekDate[] => {
@@ -124,17 +128,19 @@ export default function TurfBooking() {
     const availability = getSlotAvailability(date, slotId);
     const isSelected = isSlotSelected(date, slotId);
 
-    if (isSelected) return "bg-green-500 text-white border-green-600";
+    if (isSelected) return "bg-green text-white border-green";
     if (availability === "booked")
-      return "bg-red-100 text-red-400 border-red-200 cursor-not-allowed";
+      return "bg-red-900 text-red-400 border-red-700 cursor-not-allowed";
     if (availability === "unavailable")
-      return "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed";
-    return "bg-white text-gray-700 border-gray-300 hover:border-green-400 hover:bg-green-50 cursor-pointer";
+      return "bg-neutral-700 text-neutral-500 border-neutral-600 cursor-not-allowed";
+    return "bg-neutral-800 text-neutral-300 border-neutral-600 hover:border-yellow hover:bg-darkgreen hover:text-white cursor-pointer";
   };
 
-  const totalAmount: number = selectedSlots.length * 50; // $50 per slot
+  const totalAmount: number = selectedSlots.length * 50; // ৳50 per slot
 
-  const turfs: string[] = ["Turf A", "Turf B", "Turf C"];
+  // Get current selected turf data
+  const currentTurf =
+    mockTurfs.find((turf) => turf.name === selectedTurf) || mockTurfs[0];
 
   const getWeekRange = (): string => {
     const dates = getWeekDates(currentWeekOffset);
@@ -142,145 +148,182 @@ export default function TurfBooking() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-green-800 text-neutral-100">
+      {/* Background Grid */}
+      <div
+        style={{
+          position: "fixed",
+          inset: -1,
+          zIndex: 0,
+          backgroundImage:
+            "repeating-linear-gradient(to right, #262626 0px, #262626 1px, transparent 1px, transparent 100px), repeating-linear-gradient(to bottom, #262626 0px, #262626 1px, transparent 1px, transparent 100px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+
+      <NavBar />
+
       {/* Header */}
-      <div className="bg-green-600 text-white px-6 py-4 shadow-lg">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="bg-white text-green-600 p-2 rounded-lg">
-              <Users className="w-6 h-6" />
+      <div className="relative z-10 border-b border-neutral-800 bg-neutral-900/80 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="bg-green text-neutral-900 p-2 rounded-xl flex-shrink-0">
+                <Users className="w-5 sm:w-6 h-5 sm:h-6" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-polysans font-bold text-white">
+                  TURF BOOKING
+                </h1>
+                <p className="text-neutral-400 font-redhatmono text-xs sm:text-sm">
+                  Select your preferred slots
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold">SoccerTurf Pro</h1>
-              <p className="text-green-100">Premium Football Booking</p>
+            <div className="text-left sm:text-right">
+              <p className="text-xs sm:text-sm text-neutral-400 font-redhatmono">
+                Guest User
+              </p>
+              <p className="font-polysans font-semibold text-white text-sm sm:text-base">
+                #23037
+              </p>
             </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-green-100">Guest User</p>
-            <p className="font-semibold">#23037</p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Booking Panel */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Location Selection */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <MapPin className="w-5 h-5 text-green-600 mr-2" />
-                Select Location
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4 flex items-center">
+                <MapPin className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
+                Location
               </h2>
-              <div className="flex items-center space-x-2 text-gray-600">
-                <MapPin className="w-4 h-4" />
-                <span>SoccerTurf Pro, Sports Complex</span>
+              <div className="flex items-center space-x-2 text-neutral-300 font-redhatmono text-sm sm:text-base">
+                <MapPin className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
+                <span className="truncate">{currentTurf.location}</span>
               </div>
             </div>
 
             {/* Turf Selection */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
                 Select Turf
               </h2>
-              <div className="flex space-x-4">
-                {turfs.map((turf: string) => (
+              <div className="flex flex-wrap gap-2 sm:gap-4">
+                {mockTurfs.slice(0, 6).map((turf: TurfData) => (
                   <button
-                    key={turf}
-                    onClick={() => setSelectedTurf(turf)}
-                    className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                      selectedTurf === turf
-                        ? "bg-green-600 text-white shadow-lg"
-                        : "bg-gray-100 text-gray-700 hover:bg-green-100"
+                    key={turf.id}
+                    onClick={() => setSelectedTurf(turf.name)}
+                    className={`px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-redhatmono font-medium transition-all text-sm sm:text-base ${
+                      selectedTurf === turf.name
+                        ? "bg-green text-white shadow-lg"
+                        : "bg-neutral-800 text-neutral-300 hover:bg-darkgreen hover:text-white"
                     }`}>
-                    {turf}
+                    {turf.name.length > 12
+                      ? `${turf.name.substring(0, 12)}...`
+                      : turf.name}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Week Navigation */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-                  <Calendar className="w-5 h-5 text-green-600 mr-2" />
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white flex items-center">
+                  <Calendar className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
                   Select Week
                 </h2>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center justify-center space-x-4">
                   <button
                     onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
-                    className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors">
-                    <ChevronLeft className="w-5 h-5" />
+                    className="p-2 text-yellow hover:bg-neutral-800 rounded-xl transition-colors">
+                    <ChevronLeft className="w-4 sm:w-5 h-4 sm:h-5" />
                   </button>
-                  <span className="text-lg font-medium text-gray-700 min-w-[200px] text-center">
+                  <span className="text-sm sm:text-lg font-polysans font-medium text-white min-w-[160px] sm:min-w-[200px] text-center">
                     {getWeekRange()}
                   </span>
                   <button
                     onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
-                    className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors">
-                    <ChevronRight className="w-5 h-5" />
+                    className="p-2 text-yellow hover:bg-neutral-800 rounded-xl transition-colors">
+                    <ChevronRight className="w-4 sm:w-5 h-4 sm:h-5" />
                   </button>
                 </div>
               </div>
 
               {/* Days Header */}
-              <div className="grid grid-cols-7 gap-4 mb-4">
+              <div className="grid grid-cols-7 gap-1 sm:gap-4 mb-4">
                 {weekDates.map((day: WeekDate, index: number) => (
                   <div
                     key={index}
                     className="text-center">
-                    <div className="text-sm font-medium text-gray-600 mb-1">
+                    <div className="text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 mb-1">
                       {day.day}
                     </div>
-                    <div className="text-lg font-bold text-gray-800">
+                    <div className="text-sm sm:text-lg font-polysans font-bold text-white">
                       {day.date}
                     </div>
-                    <div className="text-xs text-gray-500">{day.month}</div>
+                    <div className="text-xs font-redhatmono text-neutral-500">
+                      {day.month}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Time Slots Grid */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-                  <Clock className="w-5 h-5 text-green-600 mr-2" />
-                  Available Slots (90 minutes each)
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white flex items-center">
+                  <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
+                  <span className="hidden sm:inline">
+                    Available Slots (90 minutes each)
+                  </span>
+                  <span className="sm:hidden">Time Slots</span>
                 </h2>
-                <div className="flex items-center space-x-6 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded"></div>
-                    <span className="text-gray-600">Available</span>
+                <div className="flex items-center space-x-3 sm:space-x-6 text-xs sm:text-sm font-redhatmono">
+                  <div className="flex items-center space-x-1 sm:space-x-2">
+                    <div className="w-3 sm:w-4 h-3 sm:h-4 bg-neutral-800 border-2 border-neutral-600 rounded"></div>
+                    <span className="text-neutral-400">Available</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-green-500 rounded"></div>
-                    <span className="text-gray-600">Selected</span>
+                  <div className="flex items-center space-x-1 sm:space-x-2">
+                    <div className="w-3 sm:w-4 h-3 sm:h-4 bg-green rounded"></div>
+                    <span className="text-neutral-400">Selected</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-red-100 border border-red-200 rounded"></div>
-                    <span className="text-gray-600">Booked</span>
+                  <div className="flex items-center space-x-1 sm:space-x-2">
+                    <div className="w-3 sm:w-4 h-3 sm:h-4 bg-red-900 border border-red-700 rounded"></div>
+                    <span className="text-neutral-400">Booked</span>
                   </div>
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <div className="grid grid-cols-8 gap-2 min-w-[800px]">
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="grid grid-cols-8 gap-1 sm:gap-2 min-w-[600px] sm:min-w-[800px] px-4 sm:px-0">
                   {/* Time Labels */}
                   <div className="col-span-1"></div>
                   {weekDates.map((day: WeekDate, index: number) => (
                     <div
                       key={index}
-                      className="text-center text-sm font-medium text-gray-600 p-2">
-                      {day.day} {day.date}
+                      className="text-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 p-1 sm:p-2">
+                      <span className="sm:hidden">{day.day}</span>
+                      <span className="hidden sm:inline">
+                        {day.day} {day.date}
+                      </span>
                     </div>
                   ))}
 
                   {/* Time Slots */}
                   {timeSlots.map((slot: TimeSlot) => (
                     <Fragment key={slot.id}>
-                      <div className="flex items-center text-sm font-medium text-gray-700 p-2">
-                        {slot.start}
+                      <div className="flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-2">
+                        <span className="sm:hidden">
+                          {slot.start.replace(" ", "")}
+                        </span>
+                        <span className="hidden sm:inline">{slot.start}</span>
                       </div>
                       {weekDates.map((day: WeekDate, dayIndex: number) => (
                         <button
@@ -288,7 +331,7 @@ export default function TurfBooking() {
                           onClick={() =>
                             toggleSlot(day.fullDate, slot.id, slot)
                           }
-                          className={`p-3 text-sm font-medium border-2 rounded-lg transition-all ${getSlotButtonClass(
+                          className={`p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium border-2 rounded-lg sm:rounded-xl transition-all ${getSlotButtonClass(
                             day.fullDate,
                             slot.id
                           )}`}
@@ -297,7 +340,8 @@ export default function TurfBooking() {
                               "available" &&
                             !isSlotSelected(day.fullDate, slot.id)
                           }>
-                          {slot.start}
+                          <span className="sm:hidden">•</span>
+                          <span className="hidden sm:inline">{slot.start}</span>
                         </button>
                       ))}
                     </Fragment>
@@ -308,72 +352,74 @@ export default function TurfBooking() {
           </div>
 
           {/* Booking Summary */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-md p-6 sticky top-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          <div className="space-y-4 sm:space-y-6 order-first lg:order-last">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 lg:sticky lg:top-6">
+              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
                 Booking Summary
               </h2>
 
               {selectedSlots.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="border border-green-200 rounded-lg p-4 bg-green-50">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-                        <Users className="w-6 h-6 text-white" />
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="border border-green/30 rounded-xl p-3 sm:p-4 bg-green/10">
+                    <div className="flex items-center space-x-3 mb-2 sm:mb-3">
+                      <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Users className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
-                          {selectedTurf}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-polysans font-semibold text-white text-sm sm:text-base truncate">
+                          {currentTurf.name}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm font-redhatmono text-neutral-400">
                           90 minutes per slot
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3 font-redhatmono text-sm sm:text-base">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Location:</span>
-                      <span className="font-medium">Sports Complex</span>
+                      <span className="text-neutral-400">Location:</span>
+                      <span className="font-medium text-white truncate ml-2">
+                        {currentTurf.location}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Selected Slots:</span>
-                      <span className="font-medium">
+                      <span className="text-neutral-400">Selected Slots:</span>
+                      <span className="font-medium text-white">
                         {selectedSlots.length}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Price per Slot:</span>
-                      <span className="font-medium">$50</span>
+                      <span className="text-neutral-400">Price per Slot:</span>
+                      <span className="font-medium text-white">&#2547;50</span>
                     </div>
                   </div>
 
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between text-lg font-bold text-green-600">
+                  <div className="border-t border-neutral-700 pt-2 sm:pt-3">
+                    <div className="flex justify-between text-base sm:text-lg font-polysans font-bold text-yellow">
                       <span>Total Amount:</span>
-                      <span>${totalAmount}</span>
+                      <span>&#2547;{totalAmount}</span>
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-4 border-t">
-                    <h4 className="font-semibold text-gray-800">
+                  <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
+                    <h4 className="font-polysans font-semibold text-white text-sm sm:text-base">
                       Selected Time Slots:
                     </h4>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                    <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
                       {selectedSlots.map(
                         (slot: SelectedSlot, index: number) => (
                           <div
                             key={index}
-                            className="text-sm bg-gray-50 p-2 rounded">
-                            <div className="font-medium">
+                            className="text-xs sm:text-sm bg-neutral-800 border border-neutral-700 p-2 rounded-xl">
+                            <div className="font-polysans font-medium text-white">
                               {new Date(slot.date).toLocaleDateString("en-US", {
                                 weekday: "short",
                                 month: "short",
                                 day: "numeric",
                               })}
                             </div>
-                            <div className="text-gray-600">
+                            <div className="font-redhatmono text-neutral-400">
                               {slot.slot.start} - {slot.slot.end}
                             </div>
                           </div>
@@ -382,22 +428,22 @@ export default function TurfBooking() {
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-4 border-t">
-                    <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
+                    <div className="space-y-2 sm:space-y-3">
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
                         <input
                           type="text"
                           placeholder="Full Name"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
                         />
                       </div>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
                         <input
                           type="tel"
                           placeholder="Mobile Number"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
                         />
                       </div>
                     </div>
@@ -405,15 +451,17 @@ export default function TurfBooking() {
 
                   <button
                     onClick={() => (window.location.href = "/payment")}
-                    className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 shadow-lg">
-                    <CreditCard className="w-5 h-5" />
-                    <span>Book Now - ${totalAmount}</span>
+                    className="w-full bg-green text-white py-2 sm:py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
+                    <CreditCard className="w-4 sm:w-5 h-4 sm:h-5" />
+                    <span>Book Now - &#2547;{totalAmount}</span>
                   </button>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>Select time slots to continue</p>
+                <div className="text-center py-6 sm:py-8 text-neutral-400">
+                  <Clock className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 text-neutral-600" />
+                  <p className="font-redhatmono text-sm sm:text-base">
+                    Select time slots to continue
+                  </p>
                 </div>
               )}
             </div>

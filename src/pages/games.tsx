@@ -1,117 +1,14 @@
 import { useState, useRef } from "react";
 import depto from "../assets/depto.jpeg";
 import { BadgeCheck } from "lucide-react";
-import ClubVolta from "../assets/turfs/clubvolta.png";
-import GSP from "../assets/turfs/gsp.png";
-import Jaff from "../assets/turfs/jaff.png";
-import KickOff from "../assets/turfs/kickoff.png";
-import Metroplex from "../assets/turfs/metroplex.png";
-import NorthArena from "../assets/turfs/northarena.png";
 import NavBar from "../components/NavBar";
 import SearchIcon from "../assets/icons/search.svg";
+import { mockTurfs, TurfData } from "../data/mockData";
 
-interface SlotCardData {
-  id: number;
-  name: string;
-  location: string;
-  rating: number;
-  slot: string;
-  price: number;
-  image: string;
-  distance: string;
+// Type alias for games page specific data structure
+interface SlotCardData extends TurfData {
+  slot: string; // Required for games page
 }
-const mockTurfs: SlotCardData[] = [
-  {
-    id: 1,
-    name: "North Arena",
-    location: "Sector-7, Uttara",
-    rating: 4.8,
-    price: 1500,
-    slot: "5/10",
-    image: NorthArena,
-    distance: "0.5 km away",
-  },
-  {
-    id: 2,
-    name: "Club Volta",
-    location: "Matikata Rd, Cantonment",
-    rating: 4.6,
-    price: 1200,
-    slot: "5/10",
-    image: ClubVolta,
-    distance: "1.2 km away",
-  },
-  {
-    id: 3,
-    name: "Galacticos Sports Pavilion (GSP)",
-    location: "Sector-15, Uttara",
-    rating: 4.9,
-    price: 1800,
-    slot: "5/10",
-    image: GSP,
-    distance: "0.8 km away",
-  },
-  {
-    id: 4,
-    name: "Metroplex",
-    location: "Khilkhet",
-    rating: 4.5,
-    price: 1000,
-    slot: "5/10",
-    image: Metroplex,
-    distance: "2.1 km away",
-  },
-  {
-    id: 5,
-    name: "KickOff",
-    location: "300 Feet Road, Purbachal",
-    rating: 4.7,
-    price: 1600,
-    slot: "5/10",
-    image: KickOff,
-    distance: "1.5 km away",
-  },
-  {
-    id: 6,
-    name: "JAFF",
-    location: "Bashundhara Gate",
-    rating: 4.4,
-    price: 2000,
-    slot: "7/10",
-    image: Jaff,
-    distance: "3.2 km away",
-  },
-  {
-    id: 7,
-    name: "North Arena",
-    location: "Sector-7, Uttara",
-    rating: 4.8,
-    price: 1500,
-    slot: "10/10",
-    image: NorthArena,
-    distance: "0.5 km away",
-  },
-  {
-    id: 8,
-    name: "Club Volta",
-    location: "Matikata Rd, Cantonment",
-    rating: 4.6,
-    price: 1200,
-    slot: "1/10",
-    image: ClubVolta,
-    distance: "1.2 km away",
-  },
-  {
-    id: 9,
-    name: "Galacticos Sports Pavilion (GSP)",
-    location: "Sector-15, Uttara",
-    rating: 4.9,
-    price: 1800,
-    slot: "5/10",
-    image: GSP,
-    distance: "0.8 km away",
-  },
-];
 
 export default function Games() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -119,8 +16,11 @@ export default function Games() {
   const searchRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
+  // Cast mockTurfs to SlotCardData since all our mock data has slot values
+  const turfsWithSlots = mockTurfs as SlotCardData[];
+
   // Filter turfs based on search term
-  const filteredTurfs = mockTurfs.filter(
+  const filteredTurfs = turfsWithSlots.filter(
     (turf) =>
       turf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       turf.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -152,7 +52,7 @@ export default function Games() {
           </h1>
 
           <Header
-            turfs={mockTurfs}
+            turfs={turfsWithSlots}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             searchRef={searchRef}

@@ -7,24 +7,12 @@ import GridIcon from "../assets/icons/grid.svg";
 import ListIcon from "../assets/icons/list.svg";
 import FilterIcon from "../assets/icons/filter.svg";
 import ArrowDownIcon from "../assets/icons/arrow-down.svg";
-import ClubVolta from "../assets/turfs/clubvolta.png";
-import GSP from "../assets/turfs/gsp.png";
-import Jaff from "../assets/turfs/jaff.png";
-import KickOff from "../assets/turfs/kickoff.png";
-import Metroplex from "../assets/turfs/metroplex.png";
-import NorthArena from "../assets/turfs/northarena.png";
 import NavBar from "../components/NavBar";
+import { mockTurfs, TurfData } from "../data/mockData";
 
 // ===== TYPE DEFINITIONS =====
-interface TurfCard {
-  id: number;
-  name: string;
-  location: string;
-  rating: number;
-  price: number;
-  image: string;
-  distance: string;
-}
+// Use TurfData from mockData for consistency
+interface TurfCard extends TurfData {}
 
 // ===== MAIN COMPONENT - FUNCTION COMPONENT =====
 export default function TurFindPage() {
@@ -41,91 +29,6 @@ export default function TurFindPage() {
   const cardsRef = useRef<HTMLDivElement>(null);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
   const filterDropdownRef = useRef<HTMLDivElement>(null);
-
-  // ===== MOCK DATA =====
-  const mockTurfs: TurfCard[] = [
-    {
-      id: 1,
-      name: "North Arena",
-      location: "Sector-7, Uttara",
-      rating: 4.8,
-      price: 1500,
-      image: NorthArena,
-      distance: "0.5 km away",
-    },
-    {
-      id: 2,
-      name: "Club Volta",
-      location: "Matikata Rd, Cantonment",
-      rating: 4.6,
-      price: 1200,
-      image: ClubVolta,
-      distance: "1.2 km away",
-    },
-    {
-      id: 3,
-      name: "Galacticos Sports Pavilion (GSP)",
-      location: "Sector-15, Uttara",
-      rating: 4.9,
-      price: 1800,
-      image: GSP,
-      distance: "0.8 km away",
-    },
-    {
-      id: 4,
-      name: "Metroplex",
-      location: "Khilkhet",
-      rating: 4.5,
-      price: 1000,
-      image: Metroplex,
-      distance: "2.1 km away",
-    },
-    {
-      id: 5,
-      name: "KickOff",
-      location: "300 Feet Road, Purbachal",
-      rating: 4.7,
-      price: 1600,
-      image: KickOff,
-      distance: "1.5 km away",
-    },
-    {
-      id: 6,
-      name: "JAFF",
-      location: "Bashundhara Gate",
-      rating: 4.4,
-      price: 2000,
-      image: Jaff,
-      distance: "3.2 km away",
-    },
-    {
-      id: 7,
-      name: "North Arena",
-      location: "Sector-7, Uttara",
-      rating: 4.8,
-      price: 1500,
-      image: NorthArena,
-      distance: "0.5 km away",
-    },
-    {
-      id: 8,
-      name: "Club Volta",
-      location: "Matikata Rd, Cantonment",
-      rating: 4.6,
-      price: 1200,
-      image: ClubVolta,
-      distance: "1.2 km away",
-    },
-    {
-      id: 9,
-      name: "Galacticos Sports Pavilion (GSP)",
-      location: "Sector-15, Uttara",
-      rating: 4.9,
-      price: 1800,
-      image: GSP,
-      distance: "0.8 km away",
-    },
-  ];
 
   // ===== SORT OPTIONS =====
   const sortOptions = [
