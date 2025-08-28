@@ -208,26 +208,24 @@ export default function TurfBooking() {
               </div>
             </div>
 
-            {/* Turf Selection */}
+            {/* Selected Turf Card */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
-                Select Turf
-              </h2>
-              <div className="flex flex-wrap gap-2 sm:gap-4">
-                {mockTurfs.slice(0, 6).map((turf: TurfData) => (
-                  <button
-                    key={turf.id}
-                    onClick={() => setSelectedTurf(turf.name)}
-                    className={`px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-redhatmono font-medium transition-all text-sm sm:text-base ${
-                      selectedTurf === turf.name
-                        ? "bg-green text-white shadow-lg"
-                        : "bg-neutral-800 text-neutral-300 hover:bg-darkgreen hover:text-white"
-                    }`}>
-                    {turf.name.length > 12
-                      ? `${turf.name.substring(0, 12)}...`
-                      : turf.name}
-                  </button>
-                ))}
+              <div className="flex items-center space-x-4">
+                {/* Turf Image */}
+                <div className="flex-shrink-0">
+                  <img
+                    src={currentTurf.image}
+                    alt={currentTurf.name}
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border-2 border-green"
+                  />
+                </div>
+
+                {/* Turf Details */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-3xl sm:text-5xl font-polysans font-bold text-white truncate">
+                    {currentTurf.name}
+                  </div>
+                </div>
               </div>
             </div>
 
