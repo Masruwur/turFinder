@@ -12,6 +12,7 @@ export interface TurfData {
   rating: number;
   price: number;
   image: string;
+  images?: string[]; // Multiple images for carousel
   distance: string;
   slot?: string; // Optional for games page
 }
@@ -25,6 +26,7 @@ export const mockTurfs: TurfData[] = [
     price: 1500,
     slot: "5/10",
     image: NorthArena,
+    images: [NorthArena, ClubVolta, GSP, KickOff], // Multiple images for carousel
     distance: "0.5 km away",
   },
   {

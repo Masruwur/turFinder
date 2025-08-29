@@ -9,8 +9,10 @@ import {
   CreditCard,
   User,
   Phone,
+  MousePointer2,
 } from "lucide-react";
 import NavBar from "../components/NavBar";
+import TurfCarousel from "../components/TurfCarousel";
 import { mockTurfs, TurfData } from "../data/mockData";
 
 interface WeekDate {
@@ -194,36 +196,210 @@ export default function TurfBooking() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Selected Turf Card - Mobile Only (shows at top) */}
+          <div className="block lg:hidden">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4">
+              <div className="aspect-square p-2">
+                <div className="h-full flex flex-col justify-between">
+                  {/* Header with Turf Name */}
+                  <div className="text-center mb-3">
+                    <div className="text-2xl font-polysans font-bold text-white mb-1">
+                      {currentTurf.name}
+                    </div>
+                  </div>
+
+                  {/* Carousel Images */}
+                  <div className="flex-1 mb-4 min-h-0">
+                    <TurfCarousel
+                      images={currentTurf.images || [currentTurf.image]}
+                      height="h-40"
+                      altBase={`${currentTurf.name} photo`}
+                      showDots={true}
+                      showArrows={true}
+                    />
+                  </div>
+
+                  {/* Info Text */}
+                  <div className="font-redhatmono text-sm text-neutral-300">
+                    <span className="text-yellow">5v5</span> field. This turf
+                    truly tests your stamina considering you can play with no
+                    outs. If you are looking for a fast-paced futsal field, this
+                    is the perfect choice.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Main Booking Panel */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Location Selection */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4 flex items-center">
-                <MapPin className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
-                Location
-              </h2>
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-2 max-w-50">
+              <div className="text-lg sm:text-xl font-polysans font-semibold text-white mb-2 flex flex-row justify-start items-center">
+                <MousePointer2 className="rotate-45 w-4 h-5 mr-2 fill-almostwhite" />
+                Navigate
+              </div>
               <div className="flex items-center space-x-2 text-neutral-300 font-redhatmono text-sm sm:text-base">
                 <MapPin className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
                 <span className="truncate">{currentTurf.location}</span>
               </div>
             </div>
 
-            {/* Selected Turf Card */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
+            {/* Booking Summary - Mobile Only (shows after navigate section) */}
+            <div className="block lg:hidden">
+              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
+                  Booking Summary
+                </h2>
+
+                {selectedSlots.length > 0 ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="border border-green/30 rounded-xl p-3 sm:p-4 bg-green/10">
+                      <div className="flex items-center space-x-3 mb-2 sm:mb-3">
+                        <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green rounded-xl flex items-center justify-center flex-shrink-0">
+                          <Users className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-polysans font-semibold text-white text-sm sm:text-base truncate">
+                            {currentTurf.name}
+                          </h3>
+                          <p className="text-xs sm:text-sm font-redhatmono text-neutral-400">
+                            90 minutes per slot
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 sm:space-y-3 font-redhatmono text-sm sm:text-base">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-400">Location:</span>
+                        <span className="font-medium text-white truncate ml-2">
+                          {currentTurf.location}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-400">
+                          Selected Slots:
+                        </span>
+                        <span className="font-medium text-white">
+                          {selectedSlots.length}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-400">
+                          Price per Slot:
+                        </span>
+                        <span className="font-medium text-white">
+                          &#2547;50
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-neutral-700 pt-2 sm:pt-3">
+                      <div className="flex justify-between text-base sm:text-lg font-polysans font-bold text-yellow">
+                        <span>Total Amount:</span>
+                        <span>&#2547;{totalAmount}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
+                      <h4 className="font-polysans font-semibold text-white text-sm sm:text-base">
+                        Selected Time Slots:
+                      </h4>
+                      <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
+                        {selectedSlots.map(
+                          (slot: SelectedSlot, index: number) => (
+                            <div
+                              key={index}
+                              className="text-xs sm:text-sm bg-neutral-800 border border-neutral-700 p-2 rounded-xl">
+                              <div className="font-polysans font-medium text-white">
+                                {new Date(slot.date).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    weekday: "short",
+                                    month: "short",
+                                    day: "numeric",
+                                  }
+                                )}
+                              </div>
+                              <div className="font-redhatmono text-neutral-400">
+                                {slot.slot.start} - {slot.slot.end}
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
+                      <div className="space-y-2 sm:space-y-3">
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
+                          <input
+                            type="text"
+                            placeholder="Full Name"
+                            className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
+                          />
+                        </div>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
+                          <input
+                            type="tel"
+                            placeholder="Mobile Number"
+                            className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => (window.location.href = "/payment")}
+                      className="w-full bg-green text-white py-2 sm:py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
+                      <CreditCard className="w-4 sm:w-5 h-4 sm:h-5" />
+                      <span>Book Now - &#2547;{totalAmount}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-6 sm:py-8 text-neutral-400">
+                    <Clock className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 text-neutral-600" />
+                    <p className="font-redhatmono text-sm sm:text-base">
+                      Select time slots to continue
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Selected Turf Card - Desktop Only */}
+            <div className="hidden lg:block bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
               <div className="flex items-center space-x-4">
                 {/* Turf Image */}
                 <div className="flex-shrink-0">
                   <img
                     src={currentTurf.image}
                     alt={currentTurf.name}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border-2 border-green"
+                    className="w-20 h-20 rounded-lg object-cover border-2 border-green"
                   />
                 </div>
 
                 {/* Turf Details */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-3xl sm:text-5xl font-polysans font-bold text-white truncate">
+                  <div className="text-3xl font-polysans font-bold text-white truncate">
                     {currentTurf.name}
+                  </div>
+                  <div className="flex items-center space-x-4 mt-2 text-sm font-redhatmono">
+                    <div className="flex items-center space-x-1">
+                      <span className="text-yellow">⭐</span>
+                      <span className="text-neutral-300">
+                        {currentTurf.rating}
+                      </span>
+                    </div>
+                    <div className="text-neutral-300">
+                      {currentTurf.distance}
+                    </div>
+                    <div className="text-green font-semibold">
+                      ₹{currentTurf.price}/hr
+                    </div>
                   </div>
                 </div>
               </div>
@@ -349,8 +525,8 @@ export default function TurfBooking() {
             </div>
           </div>
 
-          {/* Booking Summary */}
-          <div className="space-y-4 sm:space-y-6 order-first lg:order-last">
+          {/* Booking Summary - Desktop Only */}
+          <div className="hidden lg:block space-y-4 sm:space-y-6">
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 lg:sticky lg:top-6">
               <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
                 Booking Summary
