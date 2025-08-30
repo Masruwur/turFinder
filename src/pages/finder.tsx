@@ -106,50 +106,63 @@ export default function FinderPage() {
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      className="flex flex-col items-center justify-center w-full min-h-screen gap-10
-                 lg:flex-row lg:gap-0">
+    <>
+      <div className="font-bureau text-4xl text-almostwhite pt-10 pl-2 flex justify-center items-center text-center">
+        Reinvent your playing experience
+      </div>
+
       <div
-        onClick={() => handleCardClick("/turfind")}
-        ref={leftCardRef}
-        className="relative bg-black rounded-xl mr-20 -rotate-7 drop-shadow-xl drop-shadow-almostblack/70
+        ref={containerRef}
+        className="flex flex-col items-center justify-center w-full min-h-screen gap-10
+                 lg:flex-row lg:gap-0">
+        <div className="bg-red-700/20 font-redhatmono rounded-xl w-47 flex text-almostwhite p-2">
+          fastest way to book a slot and secure your place for you & your mates
+        </div>
+        <div
+          onClick={() => handleCardClick("/turfind")}
+          ref={leftCardRef}
+          className="relative bg-black rounded-xl mr-20 -rotate-7 drop-shadow-xl drop-shadow-almostblack/70
                    flex items-center justify-center overflow-hidden cursor-pointer
                    w-47 sm:w-57 md:w-87
                    h-55 sm:h-65 md:h-95
                    md:mr-0 md:mb-10">
-        <img
-          src={turFind}
-          alt="turFind"
-          className="w-full h-full object-cover rounded-xl opacity-60"
-        />
-        <div
-          className="absolute inset-0 flex flex-col justify-end items-center pb-5
+          <img
+            src={turFind}
+            alt="turFind"
+            className="w-full h-full object-cover rounded-xl opacity-60"
+          />
+          <div
+            className="absolute inset-0 flex flex-col justify-end items-center pb-5
                      font-polysans text-beige
                      text-5xl sm:text-6xl md:text-8xl">
-          <span>tur-</span>
-          <span>Find</span>
+            <span>tur-</span>
+            <span>Find</span>
+          </div>
         </div>
-      </div>
-      <div
-        ref={rightCardRef}
-        className="relative bg-black rounded-xl ml-20 rotate-7 drop-shadow-xl drop-shadow-almostblack/70
+        <div
+          ref={rightCardRef}
+          className="relative bg-black rounded-xl ml-20 rotate-7 drop-shadow-xl drop-shadow-almostblack/70
                    flex items-center justify-center overflow-hidden cursor-pointer
                    w-47 sm:w-57 md:w-87
                    h-55 sm:h-65 md:h-95">
-        <img
-          src={gameFind}
-          alt="gameFind"
-          className="w-full h-full object-cover rounded-xl opacity-60"
-        />
-        <div
-          className="absolute inset-0 flex flex-col justify-end items-center pb-5
+          <img
+            src={gameFind}
+            alt="gameFind"
+            className="w-full h-full object-cover rounded-xl opacity-60"
+          />
+          <div
+            className="absolute inset-0 flex flex-col justify-end items-center pb-5
                      font-polysans text-beige
                      text-5xl sm:text-6xl md:text-8xl">
-          <span>game-</span>
-          <span>Find</span>
+            <span>game-</span>
+            <span>Find</span>
+          </div>
+        </div>
+        <div className="bg-red-700/20 font-redhatmono rounded-2xl w-47 flex p-2 text-center text-almostwhite ">
+          find players to fill-up that slot, play vs or join others in their
+          games
         </div>
       </div>
-    </div>
+    </>
   );
 }

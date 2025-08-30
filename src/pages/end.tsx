@@ -58,16 +58,16 @@ export default function EndPage() {
         <div className="flex flex-col justify-center p-8 lg:p-16 space-y-8">
           {/* Header */}
           <div className="space-y-4">
-            <div className="inline-block px-3 py-1 bg-yellow text-black text-sm font-medium rounded-full">
+            <div className="inline-block px-3 py-1 bg-yellow text-black text-sm font-redhatmono rounded-full">
               Our Story
             </div>
-            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black font-polysans leading-tight">
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bureau font-medium text-center ">
               Connecting people through{" "}
-              <span className="bg-gradient-to-r from-green-900 to-green-700 bg-clip-text text-transparent">
+              <span className="text-almostwhite font-bureau font-medium">
                 football
               </span>
             </h1>
-            <p className="text-lg text-gray-400 font-redhatmono leading-relaxed max-w-lg">
+            <div className="text-lg text-gray-400 font-redhatmono max-w-lg bg-almostblack/50 rounded-3xl p-2">
               Three sleep-deprived sport loving developers from across the globe
               came together to revolutionize how people{" "}
               <span className="text-yellow">find</span> and{" "}
@@ -76,23 +76,40 @@ export default function EndPage() {
               noticed that our friends were struggling to find players to fill
               up our spots. That's how i came up with turFinder and my friends
               Maheer and Masroor are making that dream come true.
-            </p>
+            </div>
           </div>
-
-          {/* support */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-yellow rounded-lg">
-                  <BanknoteArrowUp className="w-5 h-5 text-black" />
+          {/* Support and Contact Section */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Support */}
+            <div className="flex-1 bg-almostblack/50 rounded-2xl p-4">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 bg-yellow rounded-lg">
+                    <BanknoteArrowUp className="w-5 h-5 text-black" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">
+                    Support us
+                  </h3>
                 </div>
-                <h3 className="text-lg font-semibold text-white">
-                  Support this journey
-                </h3>
+                <p className="text-sm text-gray-400 leading-relaxed font-redhatmono">
+                  if you wannna see the game grow come join us
+                </p>
               </div>
-              <p className="text-sm text-gray-400 leading-relaxed font-redhatmono">
-                if you wannna see the game grow come join us
-              </p>
+            </div>
+
+            {/* Contact */}
+            <div className="flex-1 bg-almostblack/50 rounded-2xl p-4">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 bg-yellow rounded-lg">
+                    <ArrowUpRight className="w-5 h-5 text-black" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">Contact</h3>
+                </div>
+                <p className="text-sm text-gray-400 leading-relaxed font-redhatmono">
+                  reach out to us for any queries or feedback
+                </p>
+              </div>
             </div>
           </div>
 

@@ -196,36 +196,35 @@ export default function TurfBooking() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Selected Turf Card - Mobile Only (shows at top) */}
-          <div className="block lg:hidden">
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4">
-              <div className="aspect-square p-2">
-                <div className="h-full flex flex-col justify-between">
-                  {/* Header with Turf Name */}
-                  <div className="text-center mb-3">
-                    <div className="text-2xl font-polysans font-bold text-white mb-1">
-                      {currentTurf.name}
-                    </div>
-                  </div>
+          {/* Selected Turf Card  */}
 
-                  {/* Carousel Images */}
-                  <div className="flex-1 mb-4 min-h-0">
-                    <TurfCarousel
-                      images={currentTurf.images || [currentTurf.image]}
-                      height="h-40"
-                      altBase={`${currentTurf.name} photo`}
-                      showDots={true}
-                      showArrows={true}
-                    />
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4">
+            <div className="aspect-square p-2">
+              <div className="flex flex-col justify-between">
+                {/* Header with Turf Name */}
+                <div className="text-start mb-3 ml-1">
+                  <div className="text-2xl font-unbounded font-bold text-white mb-1">
+                    {currentTurf.name}
                   </div>
+                </div>
 
-                  {/* Info Text */}
-                  <div className="font-redhatmono text-sm text-neutral-300">
-                    <span className="text-yellow">5v5</span> field. This turf
-                    truly tests your stamina considering you can play with no
-                    outs. If you are looking for a fast-paced futsal field, this
-                    is the perfect choice.
-                  </div>
+                {/* Carousel Images */}
+                <div className="flex-1 mb-4 min-h-0">
+                  <TurfCarousel
+                    images={currentTurf.images || [currentTurf.image]}
+                    height="h-40"
+                    altBase={`${currentTurf.name} photo`}
+                    showDots={true}
+                    showArrows={true}
+                  />
+                </div>
+
+                {/* Info Text */}
+                <div className="font-redhatmono text-sm text-neutral-300">
+                  <span className="text-yellow">5v5</span> field. This turf
+                  truly tests your stamina considering you can play with no
+                  outs. If you are looking for a fast-paced futsal field, this
+                  is the perfect choice.
                 </div>
               </div>
             </div>
@@ -367,41 +366,6 @@ export default function TurfBooking() {
                     </p>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Selected Turf Card - Desktop Only */}
-            <div className="hidden lg:block bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
-              <div className="flex items-center space-x-4">
-                {/* Turf Image */}
-                <div className="flex-shrink-0">
-                  <img
-                    src={currentTurf.image}
-                    alt={currentTurf.name}
-                    className="w-20 h-20 rounded-lg object-cover border-2 border-green"
-                  />
-                </div>
-
-                {/* Turf Details */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-3xl font-polysans font-bold text-white truncate">
-                    {currentTurf.name}
-                  </div>
-                  <div className="flex items-center space-x-4 mt-2 text-sm font-redhatmono">
-                    <div className="flex items-center space-x-1">
-                      <span className="text-yellow">⭐</span>
-                      <span className="text-neutral-300">
-                        {currentTurf.rating}
-                      </span>
-                    </div>
-                    <div className="text-neutral-300">
-                      {currentTurf.distance}
-                    </div>
-                    <div className="text-green font-semibold">
-                      ₹{currentTurf.price}/hr
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
