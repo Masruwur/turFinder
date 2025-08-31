@@ -120,7 +120,7 @@ function Header({
           className={`relative transition-all duration-300 ease-out ${
             isSearchExpanded ? "" : "w-12"
           }`}>
-          <div className="relative h-12 bg-darkgreen rounded-2xl">
+          <div className="relative h-12 bg-almostwhite rounded-2xl">
             {/* Search icon */}
             <div
               className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer"
@@ -145,7 +145,7 @@ function Header({
                 autoFocus
                 className="w-full h-full pl-12 pr-10 bg-transparent rounded-2xl
                          focus:outline-none focus:ring-2 focus:ring-gray-500
-                         font-redhatmono text-white text-sm"
+                         font-redhatmono text-black text-sm"
               />
             )}
 
@@ -211,21 +211,21 @@ function GalleryGrid({ turfs }: { turfs: SlotCardData[] }) {
         <div className="flex gap-2 font-redhatmono ml-auto">
           <button
             className="rounded-xl border border-neutral-800 px-3 
-          py-1.5 text-sm text-neutral-300 hover:bg-neutral-800
+          py-1.5 text-sm text-almostblack hover:bg-neutral-800 bg-almostwhite
           active:bg-green/55 transition-all duration-200
           ">
             slots
           </button>
           <button
             className="rounded-xl border border-neutral-800 px-3 py-1.5 
-          text-sm text-neutral-300 hover:bg-neutral-800
+          text-sm text-almostblack  bg-almostwhite hover:bg-neutral-800
           active:bg-green/55 transition-all duration-200
           ">
             price
           </button>
           <button
             className="rounded-xl border border-neutral-800 px-3 py-1.5 
-          text-sm text-neutral-300 hover:bg-neutral-800
+          text-sm text-almostblack hover:bg-neutral-800 bg-almostwhite
           active:bg-green/55 transition-all duration-200
           ">
             distance
