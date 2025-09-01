@@ -107,16 +107,26 @@ export default function FinderPage() {
 
   return (
     <>
-      <div className="font-bureau text-4xl text-almostwhite pt-10 pl-2 flex justify-center items-center text-center">
+      <div
+        className="font-bureau text-4xl md:text-6xl text-almostwhite 
+      pt-10 pl-2 
+      flex justify-center items-center text-center
+      
+      ">
         Reinvent your playing experience
       </div>
 
       <div
         ref={containerRef}
         className="flex flex-col items-center justify-center w-full min-h-screen gap-10
-                 lg:flex-row lg:gap-0">
-        <div className="bg-red-700/20 font-redhatmono rounded-xl w-47 flex text-almostwhite p-2">
-          fastest way to book a slot and secure your place for you & your mates
+                 lg:flex-row lg:gap-0 relative">
+        <div
+          className="bg-red-700/20 font-redhatmono rounded-xl w-47 flex text-almostwhite p-2
+          absolute top-8 right-4 z-0
+          lg:relative lg:top-auto lg:right-auto lg:z-auto
+        ">
+          fastest way to book a slot and secure your place for you & your
+          friends
         </div>
         <div
           onClick={() => handleCardClick("/turfind")}
@@ -125,7 +135,7 @@ export default function FinderPage() {
                    flex items-center justify-center overflow-hidden cursor-pointer
                    w-47 sm:w-57 md:w-87
                    h-55 sm:h-65 md:h-95
-                   md:mr-0 md:mb-10">
+                   md:mr-0 md:mb-10 z-10">
           <img
             src={turFind}
             alt="turFind"
@@ -144,7 +154,7 @@ export default function FinderPage() {
           className="relative bg-black rounded-xl ml-20 rotate-7 drop-shadow-xl drop-shadow-almostblack/70
                    flex items-center justify-center overflow-hidden cursor-pointer
                    w-47 sm:w-57 md:w-87
-                   h-55 sm:h-65 md:h-95">
+                   h-55 sm:h-65 md:h-95 z-10">
           <img
             src={gameFind}
             alt="gameFind"
@@ -158,7 +168,10 @@ export default function FinderPage() {
             <span>Find</span>
           </div>
         </div>
-        <div className="bg-red-700/20 font-redhatmono rounded-2xl w-47 flex p-2 text-center text-almostwhite ">
+        <div
+          className="bg-red-700/20 font-redhatmono rounded-2xl w-47 flex p-2 text-center text-almostwhite 
+                       absolute bottom-8 left-4 z-0
+                       lg:relative lg:bottom-auto lg:left-auto lg:z-auto">
           find players to fill-up that slot, play vs or join others in their
           games
         </div>
