@@ -162,9 +162,7 @@ export default function TurfBooking() {
           backgroundSize: "60px 60px",
         }}
       />
-
       <NavBar />
-
       {/* Header */}
       <div className="relative z-10 border-b border-neutral-800 bg-neutral-900/80 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
@@ -194,8 +192,8 @@ export default function TurfBooking() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="w-15/16 h-1/3 mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Selected Turf Card  */}
 
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4">
@@ -231,7 +229,7 @@ export default function TurfBooking() {
           </div>
 
           {/* Main Booking Panel */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="flex-1 space-y-4 sm:space-y-6">
             {/* Location Selection */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-2 max-w-50">
               <div className="text-lg sm:text-xl font-polysans font-semibold text-white mb-2 flex flex-row justify-start items-center">
@@ -369,52 +367,8 @@ export default function TurfBooking() {
               </div>
             </div>
 
-            {/* Week Navigation */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
-                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white flex items-center">
-                  <Calendar className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
-                  Select Week
-                </h2>
-                <div className="flex items-center justify-center space-x-4">
-                  <button
-                    onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
-                    className="p-2 text-yellow hover:bg-neutral-800 rounded-xl transition-colors">
-                    <ChevronLeft className="w-4 sm:w-5 h-4 sm:h-5" />
-                  </button>
-                  <span className="text-sm sm:text-lg font-polysans font-medium text-white min-w-[160px] sm:min-w-[200px] text-center">
-                    {getWeekRange()}
-                  </span>
-                  <button
-                    onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
-                    className="p-2 text-yellow hover:bg-neutral-800 rounded-xl transition-colors">
-                    <ChevronRight className="w-4 sm:w-5 h-4 sm:h-5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Days Header */}
-              <div className="grid grid-cols-7 gap-1 sm:gap-4 mb-4">
-                {weekDates.map((day: WeekDate, index: number) => (
-                  <div
-                    key={index}
-                    className="text-center">
-                    <div className="text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 mb-1">
-                      {day.day}
-                    </div>
-                    <div className="text-sm sm:text-lg font-polysans font-bold text-white">
-                      {day.date}
-                    </div>
-                    <div className="text-xs font-redhatmono text-neutral-500">
-                      {day.month}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Time Slots Grid */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 w-full aspect-square">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
                 <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white flex items-center">
                   <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
@@ -440,49 +394,58 @@ export default function TurfBooking() {
               </div>
 
               <div className="overflow-x-auto -mx-4 sm:mx-0">
-                <div className="grid grid-cols-8 gap-1 sm:gap-2 min-w-[600px] sm:min-w-[800px] px-4 sm:px-0">
-                  {/* Time Labels */}
-                  <div className="col-span-1"></div>
-                  {weekDates.map((day: WeekDate, index: number) => (
-                    <div
-                      key={index}
-                      className="text-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 p-1 sm:p-2">
-                      <span className="sm:hidden">{day.day}</span>
-                      <span className="hidden sm:inline">
-                        {day.day} {day.date}
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex flex-col gap-1 sm:gap-2 min-w-[600px] sm:min-w-[800px] px-4 sm:px-0">
+                  {/* Header Row with Days */}
+                  <div className="flex">
+                    <div className="flex-shrink-0 w-20 sm:w-24"></div>
+                    {weekDates.map((day: WeekDate, index: number) => (
+                      <div
+                        key={index}
+                        className="flex-1 text-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 p-1 sm:p-2">
+                        <span className="sm:hidden">{day.day}</span>
+                        <span className="hidden sm:inline">
+                          {day.day} {day.date}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
 
-                  {/* Time Slots */}
+                  {/* Time Slot Rows */}
                   {timeSlots.map((slot: TimeSlot) => (
-                    <Fragment key={slot.id}>
-                      <div className="flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-2">
+                    <div
+                      key={slot.id}
+                      className="flex">
+                      <div className="flex-shrink-0 w-20 sm:w-24 flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-2">
                         <span className="sm:hidden">
                           {slot.start.replace(" ", "")}
                         </span>
                         <span className="hidden sm:inline">{slot.start}</span>
                       </div>
                       {weekDates.map((day: WeekDate, dayIndex: number) => (
-                        <button
+                        <div
                           key={`${day.fullDate}-${slot.id}`}
-                          onClick={() =>
-                            toggleSlot(day.fullDate, slot.id, slot)
-                          }
-                          className={`p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium border-2 rounded-lg sm:rounded-xl transition-all ${getSlotButtonClass(
-                            day.fullDate,
-                            slot.id
-                          )}`}
-                          disabled={
-                            getSlotAvailability(day.fullDate, slot.id) !==
-                              "available" &&
-                            !isSlotSelected(day.fullDate, slot.id)
-                          }>
-                          <span className="sm:hidden">•</span>
-                          <span className="hidden sm:inline">{slot.start}</span>
-                        </button>
+                          className="flex-1 px-1">
+                          <button
+                            onClick={() =>
+                              toggleSlot(day.fullDate, slot.id, slot)
+                            }
+                            className={`w-full p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium border-2 rounded-lg sm:rounded-xl transition-all ${getSlotButtonClass(
+                              day.fullDate,
+                              slot.id
+                            )}`}
+                            disabled={
+                              getSlotAvailability(day.fullDate, slot.id) !==
+                                "available" &&
+                              !isSlotSelected(day.fullDate, slot.id)
+                            }>
+                            <span className="sm:hidden">•</span>
+                            <span className="hidden sm:inline">
+                              {slot.start}
+                            </span>
+                          </button>
+                        </div>
                       ))}
-                    </Fragment>
+                    </div>
                   ))}
                 </div>
               </div>
