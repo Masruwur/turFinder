@@ -171,35 +171,34 @@ export default function Calendar({
       onClick={handleOverlayClick}>
       <div
         ref={cardRef}
-        className="w-[90vw] max-w-4xl h-[80vh] bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-700">
+        className="w-19/20 max-w-3xl bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-700">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-800 border-b border-gray-700">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-gray-800 border-b border-gray-700 w-full">
+          <div className="gap-2 flex justify-evenly">
             <button
-              className="w-10 h-10 flex items-center justify-center text-white text-xl hover:bg-gray-700 rounded-lg transition-colors"
+              className=" text-white text-xl hover:bg-gray-700 rounded-lg transition-colors"
               onClick={() => navigateMonth("prev")}
               aria-label="Previous month">
               ‹
             </button>
 
-            <h2 className="text-xl font-bold text-white min-w-[200px]">
+            <div className="text-xl font-bold text-white">
               {formatMonth(currentDate)} {currentDate.getFullYear()}
-            </h2>
+            </div>
 
             <button
-              className="w-10 h-10 flex items-center justify-center text-white text-xl hover:bg-gray-700 rounded-lg transition-colors"
+              className="text-white text-xl hover:bg-gray-700 rounded-lg transition-colors"
               onClick={() => navigateMonth("next")}
               aria-label="Next month">
               ›
             </button>
           </div>
-
           {/* Google sign-in if needed */}
           {!signedIn ? (
             <button
               onClick={signIn}
-              className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors">
-              Sign in to Google
+              className="p-2 text-sm font-redhatmono bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors">
+              Google Calendar
             </button>
           ) : (
             <button
@@ -235,7 +234,7 @@ export default function Calendar({
                     rounded-2xl transition-all duration-200 border
                     ${
                       !day.isCurrentMonth
-                        ? "bg-gray-800 text-gray-500 border-gray-700"
+                        ? "bg-gray-900 text-gray-500 border-gray-700"
                         : "bg-gray-800 text-white border-gray-600"
                     }
                     ${
@@ -262,24 +261,24 @@ export default function Calendar({
                     `}>
                     {day.date.getDate()}
                   </span>
-
-                  {day.hasBookings && (
-                    <div className="flex gap-1 flex-wrap justify-center">
-                      {day.bookings?.slice(0, 3).map((b, idx) => (
-                        <div
-                          key={`${b.id}-${idx}`}
-                          className={`
-                            w-2 h-2 rounded-full
+                  <div className="relative rounded-md overflow-hidden">
+                    {day.hasBookings && (
+                      <div className="flex gap-1 justify-center">
+                        {day.bookings?.slice(0, 3).map((b, idx) => (
+                          <div
+                            key={`${b.id}-${idx}`}
+                            className={`
                             ${b.type === "slot" ? "bg-blue-400" : ""}
                             ${b.type === "pickup" ? "bg-red-400" : ""}
                           `}
-                        />
-                      ))}
-                      {(day.bookings?.length ?? 0) > 3 && (
-                        <div className="w-2 h-2 rounded-full bg-gray-400" />
-                      )}
-                    </div>
-                  )}
+                          />
+                        ))}
+                        {(day.bookings?.length ?? 0) > 3 && (
+                          <div className="rounded-full bg-gray-400" />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
