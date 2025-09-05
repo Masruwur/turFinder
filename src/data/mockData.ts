@@ -17,6 +17,33 @@ export interface TurfData {
   slot?: string; // Optional for games page
 }
 
+interface TurfLocation{
+  address : string;
+  longitude : number;
+  latitude : number;
+  googlePlaceId : string;
+}
+
+export interface TurfPrice{
+  pricePerHour : number;
+  startHour: string;
+  endHour: string;
+  startDay: number;
+  endDay: number
+}
+
+
+export interface TurfEntity{
+  id : number
+  name : string;
+  location : TurfLocation;
+  averageRating : number;
+  images : string[];
+  prices: TurfPrice[];
+  description : string;
+  slotDuration : number; // in minutes
+}
+
 export const mockTurfs: TurfData[] = [
   {
     id: 1,

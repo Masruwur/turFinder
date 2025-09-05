@@ -13,6 +13,9 @@ import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import CommandSearch from "./CommandSearch";
 import Calendar from "./navcomponents/Calendar";
+import api from "../util/api";
+import { useUser } from "../util/user";
+import { User } from "../util/user";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -24,6 +27,8 @@ export default function NavBar() {
   const navbarRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLImageElement | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
+
+  const { setUser } = useUser();
 
   const handleCalendarClick = (): void => {
     setIsCalendarOpen(!isCalendarOpen);
@@ -82,9 +87,48 @@ export default function NavBar() {
     setMode("login");
   };
 
-  const handleLogin = (): void => {};
+  const  handleLogin = async (email:string,password:string): Promise<void> => {
+    try{
+      const response = await api.post('/users/login', { email, password });
+      if(response.status === 200){
+        const accessToken  = response.data.token;
+        localStorage.setItem('accessToken', accessToken);
+        const user: User = {
+          id: response.data.id,
+          name: response.data.name,
+          email: response.data.email
+        };
+        setUser(user);
+        localStorage.setItem("user",JSON.stringify(user));  
+        setIsProfileOpen(false);
+      }
+    }catch(error){
+      console.error("Login failed:",error);
+    }
+  };
 
-  const handleSignup = (): void => {};
+  const handleSignup = async (name:string,email:string,password:string,
+                              confirmPassword:string,isChecked:boolean): Promise<void> => {
+    if(password !== confirmPassword){
+      alert("Passwords do not match");
+      return;
+    }
+    if(!isChecked){
+      alert("You must agree to the terms and conditions");
+      return;
+    }
+
+    try{
+      const response = await api.post('/users/create', { name, email, password });
+      if(response.status === 201){
+        setMode("login");
+        setIsProfileOpen(true);
+      }
+    }catch(error){
+      console.error("Signup failed:",error);
+    }
+
+  };
 
   const handleMenuItemClick = (path: string): void => {
     navigate(path);

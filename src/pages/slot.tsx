@@ -14,6 +14,9 @@ import {
 import NavBar from "../components/NavBar";
 import TurfCarousel from "../components/TurfCarousel";
 import { mockTurfs, TurfData } from "../data/mockData";
+import { useLocation } from "react-router";
+import { TurfEntity } from "../data/mockData";
+import { useUser } from "../util/user";
 
 interface WeekDate {
   date: number;
@@ -40,6 +43,8 @@ interface TurfCard extends TurfData {}
 type SlotAvailability = "available" | "booked" | "unavailable";
 
 export default function TurfBooking() {
+  const { user } = useUser();
+
   const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
   const [selectedTurf, setSelectedTurf] = useState<string>(mockTurfs[0].name);
@@ -149,6 +154,9 @@ export default function TurfBooking() {
     return `${dates[0].date} ${dates[0].month} - ${dates[6].date} ${dates[6].month}`;
   };
 
+  // fetched turf
+  const currTurf : TurfEntity = useLocation().state;
+
   return (
     <div className="min-h-screen bg-green-800 text-neutral-100">
       {/* Background Grid */}
@@ -184,10 +192,7 @@ export default function TurfBooking() {
             </div>
             <div className="text-left sm:text-right">
               <p className="text-xs sm:text-sm text-neutral-400 font-redhatmono">
-                Guest User
-              </p>
-              <p className="font-polysans font-semibold text-white text-sm sm:text-base">
-                #23037
+                {user? user.name : "Guest User"}
               </p>
             </div>
           </div>
@@ -204,16 +209,16 @@ export default function TurfBooking() {
                 {/* Header with Turf Name */}
                 <div className="text-start mb-3 ml-1">
                   <div className="text-2xl font-unbounded font-bold text-white mb-1">
-                    {currentTurf.name}
+                    {currTurf.name}
                   </div>
                 </div>
 
                 {/* Carousel Images */}
                 <div className="flex-1 mb-4 min-h-0">
                   <TurfCarousel
-                    images={currentTurf.images || [currentTurf.image]}
+                    images={currTurf.images}
                     height="h-40"
-                    altBase={`${currentTurf.name} photo`}
+                    altBase={`${currTurf.name} photo`}
                     showDots={true}
                     showArrows={true}
                   />
@@ -240,7 +245,7 @@ export default function TurfBooking() {
               </div>
               <div className="flex items-center space-x-2 text-neutral-300 font-redhatmono text-sm sm:text-base">
                 <MapPin className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
-                <span className="truncate">{currentTurf.location}</span>
+                <span className="truncate">{currTurf.location.address}</span>
               </div>
             </div>
 
