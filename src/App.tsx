@@ -4,8 +4,17 @@ import TurFindPage from "./pages/turFind";
 import Games from "./pages/games";
 import Payment from "./pages/payment";
 import Slot from "./pages/slot";
+import { useUser } from "./util/user";
+import { use, useEffect } from "react";
 
 export default function App() {
+  const { setUser } = useUser();
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    setUser(savedUser ? JSON.parse(savedUser) : null);
+  },[]);
+
+
   return (
     <Router>
       <Routes>

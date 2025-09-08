@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, MouseEvent } from "react";
+import { useNavigate } from "react-router";
 import { gsap } from "gsap";
 import SearchIcon from "../assets/icons/search.svg";
 import YellowStarIcon from "../assets/icons/yellowstar.svg";
@@ -8,7 +9,10 @@ import ListIcon from "../assets/icons/list.svg";
 import FilterIcon from "../assets/icons/filter.svg";
 import ArrowDownIcon from "../assets/icons/arrow-down.svg";
 import NavBar from "../components/NavBar";
-import { mockTurfs, TurfData } from "../data/mockData";
+import { mockTurfs, TurfData, TurfEntity } from "../data/mockData";
+import getDistanceFromLatLon  from "../util/location";
+import api from "../util/api";
+import { getMinPrice } from "../util/price";
 
 // ===== TYPE DEFINITIONS =====
 // Use TurfData from mockData for consistency
@@ -38,6 +42,41 @@ export default function TurFindPage() {
     { value: "rating", label: "Highest Rated" },
     { value: "distance", label: "Nearest First" },
   ];
+
+  //turf map varibles and calls
+  const navigate = useNavigate();
+  const  [userLocation,setUserLocation] = useState<{lat:number,lon:number}|null>(null);
+  const [TurfData,setTurfData] = useState<TurfEntity[]>([]);
+  const [loading,setLoading] = useState<boolean>(true);
+
+  useEffect(()=>{
+     const fetchTurfs = async () =>{
+      try{
+        setLoading(true);
+        const response = await api.get("/turfs");
+        const turfs : TurfEntity[] = response.data;
+        setTurfData(turfs);
+        setLoading(false);
+      }catch(err){
+        console.error("Failed to fetch turfs",err);
+      }
+     }
+     fetchTurfs();
+  },[]);
+
+  useEffect(()=>{
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition((position)=>{ 
+        setUserLocation({lat:position.coords.latitude,lon:position.coords.longitude});  
+      }
+
+      ,(error)=>{
+        console.error("Error getting location",error);
+        setUserLocation(null);
+      });
+    }
+  },[]);
+
 
   // ===== GSAP ANIMATIONS =====
   // Main animation effect that runs on component mount and dropdown state changes
@@ -86,10 +125,10 @@ export default function TurFindPage() {
 
   // ===== DATA FILTERING =====
   // Filter turfs based on search term - searches both name and location
-  const filteredTurfs = mockTurfs.filter(
+  const filteredTurfs = TurfData.filter(
     (turf) =>
       turf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      turf.location.toLowerCase().includes(searchTerm.toLowerCase())
+      turf.location.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // ===== COMPONENT RENDER =====
@@ -273,7 +312,7 @@ export default function TurFindPage() {
               onMouseLeave={handleCardLeave}>
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
                 <img
-                  src={turf.image}
+                  src={turf.images[0]}
                   alt={turf.name}
                   className="h-full w-full object-cover"
                 />
@@ -293,19 +332,19 @@ export default function TurFindPage() {
                         className="w-4 h-4"
                       />
                       <span className="font-redhatmono text-xs font-medium text-white">
-                        {turf.rating}
+                        {turf.averageRating.toFixed(1)}
                       </span>
                     </div>
                   </div>
                   <p className="text-xs text-neutral-300 font-redhatmono">
-                    {turf.location} • {turf.distance}
+                    {turf.location.address} • {userLocation ? `${getDistanceFromLatLon(userLocation.lat,userLocation.lon,turf.location.latitude,turf.location.longitude).toFixed(1)} km` : "Location Unavailable"}
                   </p>
                 </div>
 
                 {/* Price and booking button */}
                 <div className="flex items-center justify-between">
                   <div className="font-polysans text-md font-bold text-white">
-                    &#2547;{turf.price}
+                    &#2547;{getMinPrice(turf.prices)}
                     <span className="font-redhatmono text-sm font-normal text-yellow">
                       /hour
                     </span>
@@ -313,7 +352,7 @@ export default function TurFindPage() {
 
                   {/* Book now button */}
                   <button
-                    onClick={() => (window.location.href = "/slot")}
+                    onClick={() => navigate(`/slot`,{state:turf})}
                     className="px-4 py-2 font-medium rounded-lg transition-colors duration-300
                                bg-green font-redhatmono text-almostwhite cursor-pointer
                                hover:bg-darkgreen active:bg-darkgreen/80 text-sm">
