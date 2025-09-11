@@ -8,7 +8,7 @@ import { User } from "../../../util/user";
 interface LoginProps {
   isProfileOpen: boolean;
   toggleProfile: () => void;
-  handleLogin: (email :string,password:string) => void;
+  handleLogin: (email: string, password: string) => void;
   OnClickingSignUp: () => void;
 }
 
@@ -18,10 +18,17 @@ export default function Login({
   handleLogin,
   OnClickingSignUp,
 }: LoginProps) {
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
+    toggleProfile();
+  };
 
   return (
     <>
@@ -44,103 +51,136 @@ export default function Login({
             </button>
           </div>
 
-          {/* login form */}
-          <div className="flex-1 overflow-y-auto p-6 font-redhatmono">
-            <div className="space-y-6">
-              {/* email input */}
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors te "
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+          {/* If user is logged in, show logout screen */}
+          {user ? (
+            <div className="flex-1 overflow-y-auto p-6 font-redhatmono">
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-medium">Welcome, {user.name}</h2>
+                  <p className="text-gray-600 mt-2">{user.email}</p>
+                </div>
 
-              {/* password input */}
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors"
-                />
-              </div>
-
-              {/* login button */}
-              <div className="flex justify-center">
-                <button
-                  onClick={()=>handleLogin(email,password)}
-                  className="w-min rounded-2xl py-3 px-4 hover:bg-blue-600 text-black hover:text-white transition-colors font-medium cursor-pointer duration-300">
-                  Login
-                </button>
-              </div>
-
-              {/* login with google */}
-              <div>
-                <GoogleLogin
-                    onSuccess={async (credentialResponse) => {
-                      if(credentialResponse.credential){
-                        const decodedToken = jwtDecode(credentialResponse.credential);
-                        const {name,email,sub} = decodedToken as {name:string,email:string,sub:string};
-                        try{
-                            const response = await api.post("/users/google/login",{name,email,providerId:sub});
-                            if(response.status === 200){
-                                const token = response.data.token;
-                                localStorage.setItem("accessToken",token);
-                                const user: User = {
-                                                      id: response.data.id,
-                                                      name: response.data.name,
-                                                      email: response.data.email
-                                                    };
-                                setUser(user);
-                                localStorage.setItem("user",JSON.stringify(user));  
-                                toggleProfile();
-                            }
-                        }catch(err){
-                            console.error("Google Login Failed",err);
-                        }
-                      }
-                      }}
-                    onError={() => console.error("Login Failed")}
-                    containerProps = {{className : "flex items-center justify-center space-x-2 cursor-pointer"}} 
-                />
-              </div>
-
-              {/* forgot password link */}
-              <div className="text-center">
-                <a
-                  href="#"
-                  className="text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                  Forgot your password?
-                </a>
-              </div>
-
-              {/* sign up link */}
-              <div className="text-center text-sm text-gray-600">
-                Don't have an account?{" "}
-                <a
-                  onClick={OnClickingSignUp}
-                  className="text-blue-600 hover:text-blue-800 transition-colors font-medium cursor-pointer">
-                  Sign up
-                </a>
+                {/* logout button */}
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleLogout}
+                    className="w-min rounded-2xl py-3 px-4 bg-red-500 hover:bg-red-600 text-white transition-colors font-medium cursor-pointer duration-300">
+                    Logout
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            /* login form */
+            <div className="flex-1 overflow-y-auto p-6 font-redhatmono">
+              <div className="space-y-6">
+                {/* email input */}
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    className="w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors te "
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+
+                {/* password input */}
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors"
+                  />
+                </div>
+
+                {/* login button */}
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => handleLogin(email, password)}
+                    className="w-min rounded-2xl py-3 px-4 hover:bg-blue-600 text-black hover:text-white transition-colors font-medium cursor-pointer duration-300">
+                    Login
+                  </button>
+                </div>
+
+                {/* login with google */}
+                <div>
+                  <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
+                      if (credentialResponse.credential) {
+                        const decodedToken = jwtDecode(
+                          credentialResponse.credential
+                        );
+                        const { name, email, sub } = decodedToken as {
+                          name: string;
+                          email: string;
+                          sub: string;
+                        };
+                        try {
+                          const response = await api.post(
+                            "/users/google/login",
+                            { name, email, providerId: sub }
+                          );
+                          if (response.status === 200) {
+                            const token = response.data.token;
+                            localStorage.setItem("accessToken", token);
+                            const user: User = {
+                              id: response.data.id,
+                              name: response.data.name,
+                              email: response.data.email,
+                            };
+                            setUser(user);
+                            localStorage.setItem("user", JSON.stringify(user));
+                            toggleProfile();
+                          }
+                        } catch (err) {
+                          console.error("Google Login Failed", err);
+                        }
+                      }
+                    }}
+                    onError={() => console.error("Login Failed")}
+                    containerProps={{
+                      className:
+                        "flex items-center justify-center space-x-2 cursor-pointer",
+                    }}
+                  />
+                </div>
+
+                {/* forgot password link */}
+                <div className="text-center">
+                  <a
+                    href="#"
+                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                    Forgot your password?
+                  </a>
+                </div>
+
+                {/* sign up link */}
+                <div className="text-center text-sm text-gray-600">
+                  Don't have an account?{" "}
+                  <a
+                    onClick={OnClickingSignUp}
+                    className="text-blue-600 hover:text-blue-800 transition-colors font-medium cursor-pointer">
+                    Sign up
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
