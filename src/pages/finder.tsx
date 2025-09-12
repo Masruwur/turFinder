@@ -106,7 +106,7 @@ export default function FinderPage() {
   }, []);
 
   return (
-    <>
+    <div className="bg-brred">
       <div
         className="font-bureau text-4xl md:text-6xl text-almostwhite 
       pt-10 pl-2 
@@ -176,6 +176,6 @@ export default function FinderPage() {
           games
         </div>
       </div>
-    </>
+    </div>
   );
 }
