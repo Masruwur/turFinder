@@ -193,7 +193,7 @@ export default function FactsPage() {
   return (
     <div
       ref={containerRef}
-      className="flex flex-col relative items-center justify-center w-full min-h-screen">
+      className="flex flex-col relative items-center justify-center w-full min-h-screen bg-beige">
       <div className="flex flex-col  items-center text-center">
         <img
           src={pitch}

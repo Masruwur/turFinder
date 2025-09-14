@@ -13,9 +13,8 @@ import {
 } from "lucide-react";
 import NavBar from "../components/NavBar";
 import TurfCarousel from "../components/TurfCarousel";
-import { mockTurfs, TurfData } from "../data/mockData";
-import { useLocation } from "react-router";
 import { TurfEntity } from "../data/mockData";
+import { useLocation } from "react-router";
 import { useUser } from "../util/user";
 
 interface WeekDate {
@@ -38,16 +37,15 @@ interface SelectedSlot {
   slot: TimeSlot;
 }
 
-interface TurfCard extends TurfData {}
-
 type SlotAvailability = "available" | "booked" | "unavailable";
 
 export default function TurfBooking() {
   const { user } = useUser();
+  const location = useLocation();
+  const currTurf: TurfEntity = location.state;
 
   const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
-  const [selectedTurf, setSelectedTurf] = useState<string>(mockTurfs[0].name);
 
   // Generate dates for current week
   const getWeekDates = (weekOffset: number = 0): WeekDate[] => {
@@ -145,17 +143,10 @@ export default function TurfBooking() {
 
   const totalAmount: number = selectedSlots.length * 50; // ৳50 per slot
 
-  // Get current selected turf data
-  const currentTurf =
-    mockTurfs.find((turf) => turf.name === selectedTurf) || mockTurfs[0];
-
   const getWeekRange = (): string => {
     const dates = getWeekDates(currentWeekOffset);
     return `${dates[0].date} ${dates[0].month} - ${dates[6].date} ${dates[6].month}`;
   };
-
-  // fetched turf
-  const currTurf : TurfEntity = useLocation().state;
 
   return (
     <div className="min-h-screen bg-green-800 text-neutral-100">
@@ -190,388 +181,343 @@ export default function TurfBooking() {
             </div>
             <div className="text-left sm:text-right">
               <p className="text-xs sm:text-sm text-neutral-400 font-redhatmono">
-                {user? user.name : "Guest User"}
+                {user ? user.name : "Guest User"}
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="w-15/16 h-1/3 mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Selected Turf Card  */}
-
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4">
-            <div className="aspect-square p-2">
-              <div className="flex flex-col justify-between">
-                {/* Header with Turf Name */}
-                <div className="text-start mb-3 ml-1">
-                  <div className="text-2xl font-unbounded font-bold text-white mb-1">
-                    {currTurf.name}
-                  </div>
+      {/* Main */}
+      <div className="w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10 max-w-7xl">
+        {/* Bento grid: 1 col on mobile, 6 cols on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-6 auto-rows-auto gap-6 lg:gap-8">
+          {/* Selected Turf Card — big tile */}
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 lg:col-span-2 lg:row-span-2">
+            <div className="p-2 h-full flex flex-col">
+              <div className="text-start mb-3 ml-1">
+                <div className="text-2xl font-unbounded font-bold text-white mb-1">
+                  {currTurf.name}
                 </div>
+              </div>
 
-                {/* Carousel Images */}
-                <div className="flex-1 mb-4 min-h-0">
-                  <TurfCarousel
-                    images={currTurf.images}
-                    height="h-40"
-                    altBase={`${currTurf.name} photo`}
-                    showDots={true}
-                    showArrows={true}
-                  />
-                </div>
+              {/* Fixed, predictable heights for carousel improve packing */}
+              <div className="mb-4">
+                <TurfCarousel
+                  images={currTurf.images}
+                  height="h-40 lg:h-48"
+                  altBase={`${currTurf.name} photo`}
+                  showDots
+                  showArrows
+                />
+              </div>
 
-                {/* Info Text */}
-                <div className="font-redhatmono text-sm text-neutral-300">
-                  <span className="text-yellow">5v5</span> field. This turf
-                  truly tests your stamina considering you can play with no
-                  outs. If you are looking for a fast-paced futsal field, this
-                  is the perfect choice.
-                </div>
+              <div className="font-redhatmono text-sm text-neutral-300">
+                <span className="text-yellow">5v5</span> field. This turf truly
+                tests your stamina considering you can play with no outs. If you
+                are looking for a fast-paced futsal field, this is the perfect
+                choice.
               </div>
             </div>
           </div>
 
-          {/* Main Booking Panel */}
-          <div className="flex-1 space-y-4 sm:space-y-6">
-            {/* Location Selection */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-2 max-w-50">
-              <div className="text-lg sm:text-xl font-polysans font-semibold text-white mb-2 flex flex-row justify-start items-center">
-                <MousePointer2 className="rotate-45 w-4 h-5 mr-2 fill-almostwhite" />
-                Navigate
-              </div>
-              <div className="flex items-center space-x-2 text-neutral-300 font-redhatmono text-sm sm:text-base">
-                <MapPin className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
-                <span className="truncate">{currTurf.location.address}</span>
-              </div>
+          {/* Navigate — small tile */}
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-2 lg:col-span-2">
+            <div className="text-lg sm:text-xl font-polysans font-semibold text-white mb-2 flex flex-row justify-start items-center">
+              <MousePointer2 className="rotate-45 w-4 h-5 mr-2 fill-almostwhite" />
+              Navigate
             </div>
-
-            {/* Booking Summary - Mobile Only (shows after navigate section) */}
-            <div className="block lg:hidden">
-              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
-                  Booking Summary
-                </h2>
-
-                {selectedSlots.length > 0 ? (
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="border border-green/30 rounded-xl p-3 sm:p-4 bg-green/10">
-                      <div className="flex items-center space-x-3 mb-2 sm:mb-3">
-                        <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Users className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-polysans font-semibold text-white text-sm sm:text-base truncate">
-                            {currentTurf.name}
-                          </h3>
-                          <p className="text-xs sm:text-sm font-redhatmono text-neutral-400">
-                            90 minutes per slot
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 sm:space-y-3 font-redhatmono text-sm sm:text-base">
-                      <div className="flex justify-between">
-                        <span className="text-neutral-400">Location:</span>
-                        <span className="font-medium text-white truncate ml-2">
-                          {currentTurf.location}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-400">
-                          Selected Slots:
-                        </span>
-                        <span className="font-medium text-white">
-                          {selectedSlots.length}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-400">
-                          Price per Slot:
-                        </span>
-                        <span className="font-medium text-white">
-                          &#2547;50
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-neutral-700 pt-2 sm:pt-3">
-                      <div className="flex justify-between text-base sm:text-lg font-polysans font-bold text-yellow">
-                        <span>Total Amount:</span>
-                        <span>&#2547;{totalAmount}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
-                      <h4 className="font-polysans font-semibold text-white text-sm sm:text-base">
-                        Selected Time Slots:
-                      </h4>
-                      <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
-                        {selectedSlots.map(
-                          (slot: SelectedSlot, index: number) => (
-                            <div
-                              key={index}
-                              className="text-xs sm:text-sm bg-neutral-800 border border-neutral-700 p-2 rounded-xl">
-                              <div className="font-polysans font-medium text-white">
-                                {new Date(slot.date).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    weekday: "short",
-                                    month: "short",
-                                    day: "numeric",
-                                  }
-                                )}
-                              </div>
-                              <div className="font-redhatmono text-neutral-400">
-                                {slot.slot.start} - {slot.slot.end}
-                              </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
-                          <input
-                            type="text"
-                            placeholder="Full Name"
-                            className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
-                          />
-                        </div>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
-                          <input
-                            type="tel"
-                            placeholder="Mobile Number"
-                            className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => (window.location.href = "/payment")}
-                      className="w-full bg-green text-white py-2 sm:py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
-                      <CreditCard className="w-4 sm:w-5 h-4 sm:h-5" />
-                      <span>Book Now - &#2547;{totalAmount}</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-center py-6 sm:py-8 text-neutral-400">
-                    <Clock className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 text-neutral-600" />
-                    <p className="font-redhatmono text-sm sm:text-base">
-                      Select time slots to continue
-                    </p>
-                  </div>
-                )}
-              </div>
+            <div className="flex items-center space-x-2 text-neutral-300 font-redhatmono text-sm sm:text-base">
+              <MapPin className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
+              <span className="truncate">{currTurf.location.address}</span>
             </div>
+          </div>
 
-            {/* Time Slots Grid */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 w-full aspect-square">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
-                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white flex items-center">
-                  <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
-                  <span className="hidden sm:inline">
-                    Available Slots (90 minutes each)
-                  </span>
-                  <span className="sm:hidden">Time Slots</span>
-                </h2>
-                <div className="flex items-center space-x-3 sm:space-x-6 text-xs sm:text-sm font-redhatmono">
-                  <div className="flex items-center space-x-1 sm:space-x-2">
-                    <div className="w-3 sm:w-4 h-3 sm:h-4 bg-neutral-800 border-2 border-neutral-600 rounded"></div>
-                    <span className="text-neutral-400">Available</span>
-                  </div>
-                  <div className="flex items-center space-x-1 sm:space-x-2">
-                    <div className="w-3 sm:w-4 h-3 sm:h-4 bg-green rounded"></div>
-                    <span className="text-neutral-400">Selected</span>
-                  </div>
-                  <div className="flex items-center space-x-1 sm:space-x-2">
-                    <div className="w-3 sm:w-4 h-3 sm:h-4 bg-red-900 border border-red-700 rounded"></div>
-                    <span className="text-neutral-400">Booked</span>
+          {/* Booking Summary — Desktop tile */}
+          <div className="hidden lg:block bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 lg:col-span-2 lg:row-span-2 lg:sticky lg:top-6 self-start">
+            <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
+              Booking Summary
+            </h2>
+
+            {selectedSlots.length > 0 ? (
+              <div className="space-y-3 sm:space-y-4">
+                <div className="border border-green/30 rounded-xl p-3 sm:p-4 bg-green/10">
+                  <div className="flex items-center space-x-3 mb-2 sm:mb-3">
+                    <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Users className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-polysans font-semibold text-white text-sm sm:text-base truncate">
+                        {currTurf.name}
+                      </h3>
+                      <p className="text-xs sm:text-sm font-redhatmono text-neutral-400">
+                        90 minutes per slot
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="overflow-x-auto -mx-4 sm:mx-0">
-                <div className="flex flex-col gap-1 sm:gap-2 min-w-[600px] sm:min-w-[800px] px-4 sm:px-0">
-                  {/* Header Row with Days */}
-                  <div className="flex">
-                    <div className="flex-shrink-0 w-20 sm:w-24"></div>
-                    {weekDates.map((day: WeekDate, index: number) => (
+                <div className="space-y-2 sm:space-y-3 font-redhatmono text-sm sm:text-base">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">Location:</span>
+                    <span className="font-medium text-white truncate ml-2">
+                      {currTurf.location.address}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">Selected Slots:</span>
+                    <span className="font-medium text-white">
+                      {selectedSlots.length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">Price per Slot:</span>
+                    <span className="font-medium text-white">&#2547;50</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-neutral-700 pt-2 sm:pt-3">
+                  <div className="flex justify-between text-base sm:text-lg font-polysans font-bold text-yellow">
+                    <span>Total Amount:</span>
+                    <span>&#2547;{totalAmount}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
+                  <h4 className="font-polysans font-semibold text-white text-sm sm:text-base">
+                    Selected Time Slots:
+                  </h4>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {selectedSlots.map((slot: SelectedSlot, index: number) => (
                       <div
                         key={index}
-                        className="flex-1 text-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 p-1 sm:p-2">
-                        <span className="sm:hidden">{day.day}</span>
-                        <span className="hidden sm:inline">
-                          {day.day} {day.date}
-                        </span>
+                        className="text-xs sm:text-sm bg-neutral-800 border border-neutral-700 p-2 rounded-xl">
+                        <div className="font-polysans font-medium text-white">
+                          {new Date(slot.date).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </div>
+                        <div className="font-redhatmono text-neutral-400">
+                          {slot.slot.start} - {slot.slot.end}
+                        </div>
                       </div>
                     ))}
                   </div>
+                </div>
 
-                  {/* Time Slot Rows */}
-                  {timeSlots.map((slot: TimeSlot) => (
-                    <div
-                      key={slot.id}
-                      className="flex">
-                      <div className="flex-shrink-0 w-20 sm:w-24 flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-2">
-                        <span className="sm:hidden">
-                          {slot.start.replace(" ", "")}
-                        </span>
-                        <span className="hidden sm:inline">{slot.start}</span>
-                      </div>
-                      {weekDates.map((day: WeekDate, dayIndex: number) => (
-                        <div
-                          key={`${day.fullDate}-${slot.id}`}
-                          className="flex-1 px-1">
-                          <button
-                            onClick={() =>
-                              toggleSlot(day.fullDate, slot.id, slot)
-                            }
-                            className={`w-full p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium border-2 rounded-lg sm:rounded-xl transition-all ${getSlotButtonClass(
-                              day.fullDate,
-                              slot.id
-                            )}`}
-                            disabled={
-                              getSlotAvailability(day.fullDate, slot.id) !==
-                                "available" &&
-                              !isSlotSelected(day.fullDate, slot.id)
-                            }>
-                            <span className="sm:hidden">•</span>
-                            <span className="hidden sm:inline">
-                              {slot.start}
-                            </span>
-                          </button>
-                        </div>
-                      ))}
+                <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
+                      <input
+                        type="text"
+                        placeholder="Full Name"
+                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
+                      />
                     </div>
-                  ))}
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
+                      <input
+                        type="tel"
+                        placeholder="Mobile Number"
+                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => (window.location.href = "/payment")}
+                  className="w-full bg-green text-white py-2 sm:py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
+                  <CreditCard className="w-4 sm:w-5 h-4 sm:h-5" />
+                  <span>Book Now - &#2547;{totalAmount}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="text-center py-6 sm:py-8 text-neutral-400">
+                <Clock className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 text-neutral-600" />
+                <p className="font-redhatmono text-sm sm:text-base">
+                  Select time slots to continue
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Booking Summary — Mobile only tile (kept after Navigate) */}
+          <div className="block lg:hidden bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
+              Booking Summary
+            </h2>
+            {selectedSlots.length > 0 ? (
+              <div className="space-y-3 sm:space-y-4">
+                <div className="border border-green/30 rounded-xl p-3 sm:p-4 bg-green/10">
+                  <div className="flex items-center space-x-3 mb-2 sm:mb-3">
+                    <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Users className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-polysans font-semibold text-white text-sm sm:text-base truncate">
+                        {currTurf.name}
+                      </h3>
+                      <p className="text-xs sm:text-sm font-redhatmono text-neutral-400">
+                        90 minutes per slot
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 sm:space-y-3 font-redhatmono text-sm sm:text-base">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">Location:</span>
+                    <span className="font-medium text-white truncate ml-2">
+                      {currTurf.location.address}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">Selected Slots:</span>
+                    <span className="font-medium text-white">
+                      {selectedSlots.length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-400">Price per Slot:</span>
+                    <span className="font-medium text-white">&#2547;50</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-neutral-700 pt-2 sm:pt-3">
+                  <div className="flex justify-between text-base sm:text-lg font-polysans font-bold text-yellow">
+                    <span>Total Amount:</span>
+                    <span>&#2547;{totalAmount}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
+                  <h4 className="font-polysans font-semibold text-white text-sm sm:text-base">
+                    Selected Time Slots:
+                  </h4>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {selectedSlots.map((slot: SelectedSlot, index: number) => (
+                      <div
+                        key={index}
+                        className="text-xs sm:text-sm bg-neutral-800 border border-neutral-700 p-2 rounded-xl">
+                        <div className="font-polysans font-medium text-white">
+                          {new Date(slot.date).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </div>
+                        <div className="font-redhatmono text-neutral-400">
+                          {slot.slot.start} - {slot.slot.end}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => (window.location.href = "/payment")}
+                  className="w-full bg-green text-white py-2 sm:py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
+                  <CreditCard className="w-4 sm:w-5 h-4 sm:h-5" />
+                  <span>Book Now - &#2547;{totalAmount}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="text-center py-6 sm:py-8 text-neutral-400">
+                <Clock className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 text-neutral-600" />
+                <p className="font-redhatmono text-sm sm:text-base">
+                  Select time slots to continue
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Time Slots Grid — large tile */}
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 lg:col-span-4 lg:row-span-3 max-h-[70vh] overflow-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white flex items-center">
+                <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
+                <span className="hidden sm:inline">
+                  Available Slots (90 minutes each)
+                </span>
+                <span className="sm:hidden">Time Slots</span>
+              </h2>
+              <div className="flex items-center space-x-3 sm:space-x-6 text-xs sm:text-sm font-redhatmono">
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <div className="w-3 sm:w-4 h-3 sm:h-4 bg-neutral-800 border-2 border-neutral-600 rounded"></div>
+                  <span className="text-neutral-400">Available</span>
+                </div>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <div className="w-3 sm:w-4 h-3 sm:h-4 bg-green rounded"></div>
+                  <span className="text-neutral-400">Selected</span>
+                </div>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <div className="w-3 sm:w-4 h-3 sm:h-4 bg-red-900 border border-red-700 rounded"></div>
+                  <span className="text-neutral-400">Booked</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Booking Summary - Desktop Only */}
-          <div className="hidden lg:block space-y-4 sm:space-y-6">
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 lg:sticky lg:top-6">
-              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
-                Booking Summary
-              </h2>
-
-              {selectedSlots.length > 0 ? (
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="border border-green/30 rounded-xl p-3 sm:p-4 bg-green/10">
-                    <div className="flex items-center space-x-3 mb-2 sm:mb-3">
-                      <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Users className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-polysans font-semibold text-white text-sm sm:text-base truncate">
-                          {currentTurf.name}
-                        </h3>
-                        <p className="text-xs sm:text-sm font-redhatmono text-neutral-400">
-                          90 minutes per slot
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 sm:space-y-3 font-redhatmono text-sm sm:text-base">
-                    <div className="flex justify-between">
-                      <span className="text-neutral-400">Location:</span>
-                      <span className="font-medium text-white truncate ml-2">
-                        {currentTurf.location}
+            {/* Horizontal scroll only below lg; desktop packs naturally */}
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="flex flex-col gap-1 sm:gap-2 md:min-w-[700px] lg:min-w-0 px-4 sm:px-0">
+                {/* Header Row with Days */}
+                <div className="flex">
+                  <div className="flex-shrink-0 w-20 sm:w-24"></div>
+                  {weekDates.map((day: WeekDate, index: number) => (
+                    <div
+                      key={index}
+                      className="flex-1 text-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 p-1 sm:p-2">
+                      <span className="sm:hidden">{day.day}</span>
+                      <span className="hidden sm:inline">
+                        {day.day} {day.date}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-400">Selected Slots:</span>
-                      <span className="font-medium text-white">
-                        {selectedSlots.length}
+                  ))}
+                </div>
+
+                {/* Time Slot Rows */}
+                {timeSlots.map((slot: TimeSlot) => (
+                  <div
+                    key={slot.id}
+                    className="flex">
+                    <div className="flex-shrink-0 w-20 sm:w-24 flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-2">
+                      <span className="sm:hidden">
+                        {slot.start.replace(" ", "")}
                       </span>
+                      <span className="hidden sm:inline">{slot.start}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-400">Price per Slot:</span>
-                      <span className="font-medium text-white">&#2547;50</span>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-neutral-700 pt-2 sm:pt-3">
-                    <div className="flex justify-between text-base sm:text-lg font-polysans font-bold text-yellow">
-                      <span>Total Amount:</span>
-                      <span>&#2547;{totalAmount}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
-                    <h4 className="font-polysans font-semibold text-white text-sm sm:text-base">
-                      Selected Time Slots:
-                    </h4>
-                    <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
-                      {selectedSlots.map(
-                        (slot: SelectedSlot, index: number) => (
-                          <div
-                            key={index}
-                            className="text-xs sm:text-sm bg-neutral-800 border border-neutral-700 p-2 rounded-xl">
-                            <div className="font-polysans font-medium text-white">
-                              {new Date(slot.date).toLocaleDateString("en-US", {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </div>
-                            <div className="font-redhatmono text-neutral-400">
-                              {slot.slot.start} - {slot.slot.end}
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
-                    <div className="space-y-2 sm:space-y-3">
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
-                        <input
-                          type="text"
-                          placeholder="Full Name"
-                          className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
-                        />
+                    {weekDates.map((day: WeekDate) => (
+                      <div
+                        key={`${day.fullDate}-${slot.id}`}
+                        className="flex-1 px-1">
+                        <button
+                          onClick={() =>
+                            toggleSlot(day.fullDate, slot.id, slot)
+                          }
+                          className={`w-full p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium border-2 rounded-lg sm:rounded-xl transition-all ${getSlotButtonClass(
+                            day.fullDate,
+                            slot.id
+                          )}`}
+                          disabled={
+                            getSlotAvailability(day.fullDate, slot.id) !==
+                              "available" &&
+                            !isSlotSelected(day.fullDate, slot.id)
+                          }>
+                          <span className="sm:hidden">•</span>
+                          <span className="hidden sm:inline">{slot.start}</span>
+                        </button>
                       </div>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
-                        <input
-                          type="tel"
-                          placeholder="Mobile Number"
-                          className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
-                        />
-                      </div>
-                    </div>
+                    ))}
                   </div>
-
-                  <button
-                    onClick={() => (window.location.href = "/payment")}
-                    className="w-full bg-green text-white py-2 sm:py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
-                    <CreditCard className="w-4 sm:w-5 h-4 sm:h-5" />
-                    <span>Book Now - &#2547;{totalAmount}</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="text-center py-6 sm:py-8 text-neutral-400">
-                  <Clock className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 text-neutral-600" />
-                  <p className="font-redhatmono text-sm sm:text-base">
-                    Select time slots to continue
-                  </p>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
           </div>
+          {/* End Time Slots tile */}
         </div>
       </div>
     </div>
