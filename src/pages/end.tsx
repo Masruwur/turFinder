@@ -104,10 +104,8 @@ export default function EndPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="flex-1 font-unbounded">
-                  <div className="text-sm font-redhatmono text-white">
-                    Rawnak
-                  </div>
+                <div className="flex-1 font-redhatmono">
+                  <div className="text-sm text-white">Rawnak</div>
                   <div className="text-xs text-gray-400">UNSW, Sydney</div>
                   <div className="text-xs text-red-400">
                     Full-Stack Developer
@@ -124,10 +122,8 @@ export default function EndPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="flex-1 font-unbounded">
-                  <div className="text-sm font-redhatmono text-white">
-                    Maheer
-                  </div>
+                <div className="flex-1 font-redhatmono">
+                  <div className="text-sm  text-white">Maheer</div>
                   <div className="text-xs text-gray-400">ASU, Tempe</div>
                   <div className="text-xs text-orange-400">
                     Frontend Engineer
@@ -144,10 +140,8 @@ export default function EndPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="flex-1 font-unbounded">
-                  <div className="text-sm font-redhatmono text-white">
-                    Masroor
-                  </div>
+                <div className="flex-1 font-redhatmono">
+                  <div className="text-sm text-white">Masroor</div>
                   <div className="text-xs text-gray-400">BUET, Dhaka</div>
                   <div className="text-xs text-yellow-400">
                     Backend Engineer
