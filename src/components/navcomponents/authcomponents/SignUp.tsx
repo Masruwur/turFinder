@@ -1,10 +1,11 @@
 import { useState } from "react";
-import api from "../../../util/api";
+import ReCAPTCHA from 'react-google-recaptcha';
+
 
 interface SignUpProps {
   isProfileOpen: boolean;
   toggleProfile: () => void;
-  handleSignUp: (name:string,email:string,password:string,confirmPassword:string,isChecked:boolean) => void;
+  handleSignUp: (name:string,email:string,password:string,confirmPassword:string,isChecked:boolean,captchaValue:string|null) => void;
   OnClickingLogin: () => void;
 }
 
@@ -20,6 +21,7 @@ export default function SignUp({
   const [password,setPassword] = useState("");
   const [confirmPassword,setConfirmPassword] = useState("");
   const [isChecked,setIsChecked] = useState(false);
+  const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
   return (
     <>
       <div
@@ -151,11 +153,19 @@ export default function SignUp({
                 </label>
               </div>
 
+              {/* recaptcha */}
+              <div className="flex justify-center">
+                  <ReCAPTCHA
+                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                    onChange={(value) => setRecaptchaValue(value)}
+                  />
+              </div>
+
               {/* signup button */}
               <div className="flex justify-center">
                 <button
                   type="button"
-                  onClick={()=>handleSignUp(firstName+" "+lastName,email,password,confirmPassword,isChecked)}
+                  onClick={()=>handleSignUp(firstName+" "+lastName,email,password,confirmPassword,isChecked,recaptchaValue)}
                   className="w-min rounded-2xl py-3 px-4 hover:bg-blue-600 text-black hover:text-white transition-colors font-medium cursor-pointer duration-300">
                   Create Account
                 </button>
