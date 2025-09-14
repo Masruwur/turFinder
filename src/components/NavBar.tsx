@@ -108,7 +108,13 @@ export default function NavBar() {
   };
 
   const handleSignup = async (name:string,email:string,password:string,
-                              confirmPassword:string,isChecked:boolean): Promise<void> => {
+                              confirmPassword:string,isChecked:boolean,captchaValue:string|null): Promise<void> => {
+                                
+    if(!captchaValue){
+      alert("Please complete the reCAPTCHA");
+      return;
+    }                            
+
     if(password !== confirmPassword){
       alert("Passwords do not match");
       return;
@@ -119,7 +125,7 @@ export default function NavBar() {
     }
 
     try{
-      const response = await api.post('/users/create', { name, email, password });
+      const response = await api.post('/users/create', { name, email, password, token: captchaValue });
       if(response.status === 201){
         setMode("login");
         setIsProfileOpen(true);
@@ -129,6 +135,14 @@ export default function NavBar() {
     }
 
   };
+
+  const handleLogout = (): void => {
+    setUser(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    navigate("/");
+    setIsProfileOpen(false);
+  }
 
   const handleMenuItemClick = (path: string): void => {
     navigate(path);
