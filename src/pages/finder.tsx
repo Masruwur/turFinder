@@ -142,12 +142,12 @@ export default function FinderPage() {
           // Animate text boxes for desktop
           gsap.fromTo(
             leftTextRef.current,
-            { opacity: 0, scale: 0.8, x: "5vw", y: "5vh" },
+            { opacity: 0, scale: 0.5, x: "5vw", y: "5vh" },
             {
               opacity: 1,
               scale: 1,
-              x: "-5vw",
-              y: "51vh",
+              x: "-4vw",
+              y: "40vh",
               duration: 1,
               delay: 0.5,
               ease: "power2.inOut",
@@ -160,12 +160,12 @@ export default function FinderPage() {
           );
           gsap.fromTo(
             rightTextRef.current,
-            { opacity: 0, scale: 0.8, x: "-8vw", y: "-40vh" },
+            { opacity: 0, scale: 0.5, x: "-8vw", y: "-40vh" },
             {
               opacity: 1,
               scale: 1,
-              x: "5vw",
-              y: "-9vh",
+              x: "4vw",
+              y: "-6vh",
               duration: 1,
               delay: 0.5,
               ease: "power2.inOut",
