@@ -166,7 +166,7 @@ function ReviewsCard() {
   ];
   return (
     <BentoCard className="p-5 sm:p-6">
-      <h3 className="font-polysans text-xl font-semibold text-white">
+      <h3 className="flex justify-center font-polysans text-xl font-semibold text-white">
         Reviews
       </h3>
       <div className="mt-4 space-y-3">
@@ -310,7 +310,7 @@ export default function TurfBooking() {
   const getWeekDates = (weekOffset: number = 0): WeekDate[] => {
     const today = new Date();
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay() + weekOffset * 7);
+    startOfWeek.setDate(today.getDate());
 
     const dates: WeekDate[] = [];
     for (let i = 0; i < 7; i++) {
@@ -329,7 +329,7 @@ export default function TurfBooking() {
   // 90-minute slots, 6:00 → 22:30 end
   const generateTimeSlots = (): TimeSlot[] => {
     const slots: TimeSlot[] = [];
-    for (let hour = 6; hour <= 21; hour += 1.5) {
+    for (let hour = 7; hour <= 22; hour += 1.5) {
       const startHour = Math.floor(hour);
       const startMinute = (hour % 1) * 60;
       const endHour = Math.floor(hour + 1.5);
@@ -338,7 +338,9 @@ export default function TurfBooking() {
       const fmt = (h: number, m: number) => {
         const period = h >= 12 ? "PM" : "AM";
         const displayHour = h > 12 ? h - 12 : h === 0 ? 12 : h;
-        return `${displayHour}:${m.toString().padStart(2, "0")} ${period}`;
+        // Add zero padding to hours
+        const paddedHour = displayHour.toString().padStart(2, "0");
+        return `${paddedHour}:${m.toString().padStart(2, "0")} ${period}`;
       };
 
       slots.push({
@@ -356,12 +358,25 @@ export default function TurfBooking() {
   const weekDates = getWeekDates(currentWeekOffset);
   const timeSlots = generateTimeSlots();
 
+  const getSeededRandom = (seed: string): number => {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      const char = seed.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    // Convert to 0-1 range
+    return Math.abs(hash) / 2147483647;
+  };
+
   // Mock availability
   const getSlotAvailability = (
-    _date: string,
-    _slotId: string
+    date: string,
+    slotId: string
   ): SlotAvailability => {
-    const random = Math.random();
+    const seed = `${date}-${slotId}-${currTurf.id}`; // Include turf ID for consistency
+    const random = getSeededRandom(seed);
+
     if (random > 0.7) return "booked";
     if (random > 0.85) return "unavailable";
     return "available";
@@ -460,9 +475,9 @@ export default function TurfBooking() {
           </div>
 
           {/* ---- KPIs (top-right), spans rows 1..2 ---- */}
-          <div className="xl:col-start-9 xl:col-end-13 xl:row-start-1 xl:row-end-3">
+          <div className="xl:col-start-9 xl:col-end-13 xl:row-start-1 xl:row-end-2">
             <BentoCard className="p-5 sm:p-6">
-              <h3 className="font-polysans text-xl font-semibold text-white">
+              <h3 className="flex justify-center font-polysans text-xl font-semibold text-white">
                 Today’s Capacity
               </h3>
               <div className="grid grid-cols-3 gap-3 mt-4">
@@ -521,10 +536,10 @@ export default function TurfBooking() {
           <div className="xl:col-start-1 xl:col-end-9 xl:row-start-4 xl:row-end-7">
             <BentoCard className="p-5 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
-                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white">
+                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white pt-2 pl-6">
                   Available Slots
                 </h2>
-                <div className="flex items-center space-x-4 text-xs sm:text-sm font-redhatmono text-neutral-400">
+                <div className="flex items-center space-x-4 pt-2 pr-6 text-xs sm:text-sm font-redhatmono text-neutral-400">
                   <span className="flex items-center">
                     <span className="w-3 h-3 mr-2 rounded border border-neutral-500 inline-block" />
                     Available
@@ -542,7 +557,7 @@ export default function TurfBooking() {
 
               {/* Scrollable content so the tile never grows and the grid stays gapless */}
               <div className="grow overflow-x-auto -mx-2 sm:mx-0">
-                <div className="flex flex-col gap-1 sm:gap-2 md:min-w-[700px] xl:min-w-0 px-2 sm:px-0">
+                <div className="flex flex-col gap-1 sm:gap-2 md:min-w-[700px] xl:min-w-0 px-2 sm:px-5">
                   {/* Days header */}
                   <div className="flex">
                     <div className="flex-shrink-0 w-20 sm:w-24" />
@@ -563,7 +578,7 @@ export default function TurfBooking() {
                     <div
                       key={slot.id}
                       className="flex">
-                      <div className="flex-shrink-0 w-20 sm:w-24 flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-2">
+                      <div className="flex-shrink-0 w-20 sm:w-24 flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-1">
                         <span className="sm:hidden">
                           {slot.start.replace(" ", "")}
                         </span>
@@ -588,9 +603,7 @@ export default function TurfBooking() {
                               !isSlotSelected(day.fullDate, slot.id)
                             }>
                             <span className="sm:hidden">•</span>
-                            <span className="hidden sm:inline">
-                              {slot.start}
-                            </span>
+                            <span className="hidden sm:inline"></span>
                           </button>
                         </div>
                       ))}
@@ -604,8 +617,11 @@ export default function TurfBooking() {
           {/* ---- RIGHT COLUMN: Summary (rows 3..6) OR Reviews ---- */}
           {hasSummary ? (
             <>
+              <div className="xl:col-start-9 xl:col-end-13 xl:row-start-2 xl:row-end-4">
+                <ReviewsCard />
+              </div>
               {/* Desktop sticky summary */}
-              <div className="hidden xl:block xl:col-start-9 xl:col-end-13 xl:row-start-3 xl:row-end-7">
+              <div className="hidden xl:block xl:col-start-9 xl:col-end-13 xl:row-start-4 xl:row-end-8">
                 <BentoCard className="p-5 sm:p-6 sticky top-6">
                   <h2 className="text-xl font-polysans font-semibold text-white mb-3">
                     Booking Summary
@@ -635,7 +651,7 @@ export default function TurfBooking() {
             </>
           ) : (
             // If nothing selected, keep grid full with Reviews
-            <div className="xl:col-start-9 xl:col-end-13 xl:row-start-3 xl:row-end-7">
+            <div className="xl:col-start-9 xl:col-end-13 xl:row-start-2 xl:row-end-4">
               <ReviewsCard />
             </div>
           )}
