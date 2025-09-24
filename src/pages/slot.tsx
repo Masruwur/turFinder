@@ -1,20 +1,23 @@
-import { useState, Fragment } from "react";
+import { useState, useEffect } from "react";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-  Clock,
   MapPin,
   Users,
   CreditCard,
-  User,
+  User as UserIcon,
   Phone,
   MousePointer2,
+  X,
+  LogIn,
+  CheckCircle2,
+  ShieldCheck,
+  Clock,
+  BellRing,
+  Gift,
 } from "lucide-react";
 import NavBar from "../components/NavBar";
 import TurfCarousel from "../components/TurfCarousel";
 import { TurfEntity } from "../data/mockData";
-import { useLocation } from "react-router";
+import { redirect, useLocation } from "react-router";
 import { useUser } from "../util/user";
 
 interface WeekDate {
@@ -23,40 +26,178 @@ interface WeekDate {
   month: string;
   fullDate: string;
 }
-
 interface TimeSlot {
   id: string;
   start: string;
   end: string;
   time24: string;
 }
-
 interface SelectedSlot {
   date: string;
   slotId: string;
   slot: TimeSlot;
 }
-
 type SlotAvailability = "available" | "booked" | "unavailable";
 
-// Booking Summary Component
+function LoginNudge() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener("open-login-nudge", onOpen as EventListener);
+    return () =>
+      window.removeEventListener("open-login-nudge", onOpen as EventListener);
+  }, []);
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-neutral-950 border border-neutral-800 shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex items-center justify-center hover:bg-neutral-900 transition-colors"
+        aria-label="Why sign in">
+        <BellRing className="w-5 h-5 text-white" />
+        <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-red-500 ring-2 ring-neutral-950" />
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+          <div className="absolute bottom-6 right-6 w-[92vw] max-w-sm rounded-3xl bg-neutral-950 border border-neutral-800 shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-neutral-800 flex items-start justify-between">
+              <div>
+                <div className="text-[11px] tracking-widest text-green-400/80">
+                  NEW
+                </div>
+                <h3 className="text-lg font-polysans font-semibold text-white">
+                  Why sign in matters
+                </h3>
+                <p className="text-neutral-400 text-sm mt-1">
+                  Keep your selections, pay faster, and never miss a match.
+                </p>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-neutral-900 text-neutral-400"
+                aria-label="Close">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3">
+              <div className="rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-900/60">
+                <img
+                  src={
+                    /* fallback tiny banner */ "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                  }
+                  alt=""
+                  className="h-32 w-full object-cover"
+                />
+              </div>
+
+              <ul className="space-y-2 text-sm text-neutral-300">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green" />
+                  <span>Save and resume bookings across devices</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Clock className="w-4 h-4 text-yellow" />
+                  <span>Get reminders and reschedule updates instantly</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <ShieldCheck className="w-4 h-4 text-blue-400" />
+                  <span>Secure payments with receipts in one place</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="px-4 py-3 border-t border-neutral-800 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-neutral-400">
+                <div className="h-7 w-7 rounded-full bg-neutral-900 border border-neutral-800 grid place-items-center">
+                  <Gift className="w-4 h-4 text-neutral-200" />
+                </div>
+                Perks, faster checkout, saved teams
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 hover:bg-neutral-800">
+                  Later
+                </button>
+                <a
+                  href="/login"
+                  className="px-3 py-2 rounded-xl bg-green text-white hover:bg-darkgreen flex items-center gap-2">
+                  <LogIn className="w-4 h-4" />
+                  Sign in
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function BentoCard({
+  className = "",
+  children,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <div
+      className={[
+        "bg-transparent border border-neutral-800 rounded-2xl",
+        "shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset]",
+        "h-full flex flex-col overflow-hidden",
+        className,
+      ].join(" ")}>
+      {children}
+    </div>
+  );
+}
+
+function ReviewsCard() {
+  const reviews = [
+    { name: "mhr", msg: "Super clean turf & smooth booking." },
+    { name: "rhd", msg: "Lighting was great for night play!" },
+    { name: "mas", msg: "Friendly staff + quick check-in." },
+  ];
+  return (
+    <BentoCard className="p-5 sm:p-6">
+      <h3 className="font-polysans text-xl font-semibold text-white">
+        Reviews
+      </h3>
+      <div className="mt-4 space-y-3">
+        {reviews.map((r, i) => (
+          <div
+            key={i}
+            className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3">
+            <p className="font-polysans text-sm text-neutral-200">
+              <span className="font-semibold text-white">{r.name}</span> —{" "}
+              {r.msg}
+            </p>
+          </div>
+        ))}
+      </div>
+    </BentoCard>
+  );
+}
+
 interface BookingSummaryProps {
   selectedSlots: SelectedSlot[];
   currTurf: TurfEntity;
   totalAmount: number;
   isMobile?: boolean;
 }
-
 function BookingSummary({
   selectedSlots,
   currTurf,
   totalAmount,
   isMobile = false,
 }: BookingSummaryProps) {
-  // Only render if there are selected slots
-  if (selectedSlots.length === 0) {
-    return null;
-  }
+  if (selectedSlots.length === 0) return null;
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -105,7 +246,7 @@ function BookingSummary({
           Selected Time Slots:
         </h4>
         <div className="space-y-2 max-h-40 overflow-y-auto">
-          {selectedSlots.map((slot: SelectedSlot, index: number) => (
+          {selectedSlots.map((slot, index) => (
             <div
               key={index}
               className="text-xs sm:text-sm bg-neutral-800 border border-neutral-700 p-2 rounded-xl">
@@ -128,19 +269,19 @@ function BookingSummary({
         <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-neutral-700">
           <div className="space-y-2 sm:space-y-3">
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
+              <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Full Name"
-                className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
+                className="w-full pl-10 pr-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
               />
             </div>
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 sm:w-4 h-3 sm:h-4" />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
               <input
                 type="tel"
                 placeholder="Mobile Number"
-                className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
+                className="w-full pl-10 pr-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl focus:ring-2 focus:ring-green focus:border-transparent font-redhatmono text-white placeholder-neutral-500 text-sm sm:text-base"
               />
             </div>
           </div>
@@ -149,8 +290,8 @@ function BookingSummary({
 
       <button
         onClick={() => (window.location.href = "/payment")}
-        className="w-full bg-green text-white py-2 sm:py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
-        <CreditCard className="w-4 sm:w-5 h-4 sm:h-5" />
+        className="w-full bg-green text-white py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
+        <CreditCard className="w-5 h-5" />
         <span>Book Now - &#2547;{totalAmount}</span>
       </button>
     </div>
@@ -165,13 +306,13 @@ export default function TurfBooking() {
   const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
 
-  // Generate dates for current week
+  // Week dates
   const getWeekDates = (weekOffset: number = 0): WeekDate[] => {
     const today = new Date();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay() + weekOffset * 7);
 
-    const dates = [];
+    const dates: WeekDate[] = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
@@ -185,16 +326,16 @@ export default function TurfBooking() {
     return dates;
   };
 
-  // Generate time slots (6 AM to 11 PM, 90-minute slots)
+  // 90-minute slots, 6:00 → 22:30 end
   const generateTimeSlots = (): TimeSlot[] => {
-    const slots = [];
+    const slots: TimeSlot[] = [];
     for (let hour = 6; hour <= 21; hour += 1.5) {
       const startHour = Math.floor(hour);
       const startMinute = (hour % 1) * 60;
       const endHour = Math.floor(hour + 1.5);
       const endMinute = ((hour + 1.5) % 1) * 60;
 
-      const formatTime = (h: number, m: number): string => {
+      const fmt = (h: number, m: number) => {
         const period = h >= 12 ? "PM" : "AM";
         const displayHour = h > 12 ? h - 12 : h === 0 ? 12 : h;
         return `${displayHour}:${m.toString().padStart(2, "0")} ${period}`;
@@ -202,8 +343,8 @@ export default function TurfBooking() {
 
       slots.push({
         id: `${startHour}-${startMinute}`,
-        start: formatTime(startHour, startMinute),
-        end: formatTime(endHour, endMinute),
+        start: fmt(startHour, startMinute),
+        end: fmt(endHour, endMinute),
         time24: `${startHour.toString().padStart(2, "0")}:${startMinute
           .toString()
           .padStart(2, "0")}`,
@@ -215,10 +356,10 @@ export default function TurfBooking() {
   const weekDates = getWeekDates(currentWeekOffset);
   const timeSlots = generateTimeSlots();
 
-  // Mock availability data
+  // Mock availability
   const getSlotAvailability = (
-    date: string,
-    slotId: string
+    _date: string,
+    _slotId: string
   ): SlotAvailability => {
     const random = Math.random();
     if (random > 0.7) return "booked";
@@ -226,227 +367,278 @@ export default function TurfBooking() {
     return "available";
   };
 
-  const isSlotSelected = (date: string, slotId: string): boolean => {
-    return selectedSlots.some(
-      (slot) => slot.date === date && slot.slotId === slotId
-    );
-  };
+  const isSlotSelected = (date: string, slotId: string) =>
+    selectedSlots.some((s) => s.date === date && s.slotId === slotId);
 
-  const toggleSlot = (date: string, slotId: string, slot: TimeSlot): void => {
-    const slotKey: SelectedSlot = { date, slotId, slot };
-    const isSelected = isSlotSelected(date, slotId);
-
-    if (isSelected) {
-      setSelectedSlots(
-        selectedSlots.filter((s) => !(s.date === date && s.slotId === slotId))
+  const toggleSlot = (date: string, slotId: string, slot: TimeSlot) => {
+    const already = isSlotSelected(date, slotId);
+    if (already) {
+      setSelectedSlots((prev) =>
+        prev.filter((s) => !(s.date === date && s.slotId === slotId))
       );
-    } else {
-      if (getSlotAvailability(date, slotId) === "available") {
-        setSelectedSlots([...selectedSlots, slotKey]);
-      }
+    } else if (getSlotAvailability(date, slotId) === "available") {
+      setSelectedSlots((prev) => [...prev, { date, slotId, slot }]);
     }
   };
 
   const getSlotButtonClass = (date: string, slotId: string): string => {
     const availability = getSlotAvailability(date, slotId);
-    const isSelected = isSlotSelected(date, slotId);
-
-    if (isSelected) return "bg-green text-white border-green";
+    const active = isSlotSelected(date, slotId);
+    if (active) return "bg-green text-white border-green";
     if (availability === "booked")
-      return "bg-red-900 text-red-400 border-red-700 cursor-not-allowed";
+      return "bg-red-900 text-red-300 border-red-800 cursor-not-allowed";
     if (availability === "unavailable")
-      return "bg-neutral-700 text-neutral-500 border-neutral-600 cursor-not-allowed";
-    return "bg-neutral-800 text-neutral-300 border-neutral-600 hover:border-yellow hover:bg-darkgreen hover:text-white cursor-pointer";
+      return "bg-neutral-800 text-neutral-500 border-neutral-700 cursor-not-allowed";
+    return "bg-neutral-900 text-neutral-300 border-neutral-600 hover:border-yellow hover:bg-darkgreen hover:text-white cursor-pointer";
   };
 
-  const totalAmount: number = selectedSlots.length * 50; // ৳50 per slot
-
-  const getWeekRange = (): string => {
-    const dates = getWeekDates(currentWeekOffset);
-    return `${dates[0].date} ${dates[0].month} - ${dates[6].date} ${dates[6].month}`;
-  };
+  const totalAmount = selectedSlots.length * 1750;
+  const hasSummary = selectedSlots.length > 0;
 
   return (
     <div className="min-h-screen bg-black text-neutral-100">
       <NavBar />
-      {/* Header */}
-      <div className="relative z-10 border-b border-neutral-800 bg-neutral-900/80 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+
+      {/* Render the floating red-dot button only when logged out */}
+      {!user && <LoginNudge />}
+
+      {/* Header (replace your snippet with this so it also opens the pop-up) */}
+      <div className="relative md:h-17.5 rounded-b-2xl z-10 border-b border-neutral-800 bg-neutral-900/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-polysans font-bold text-white">
-                  TURF BOOKING
-                </h1>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-xs sm:text-sm text-neutral-400 font-redhatmono">
-                {user ? user.name : "Guest User"}
-              </p>
-            </div>
+            <h1 className="text-2xl font-polysans font-bold text-white">
+              TURF BOOKING
+            </h1>
+            <p className="text-xs sm:text-sm text-white font-redhatmono">
+              {user ? (
+                user.name
+              ) : (
+                <button
+                  onClick={() =>
+                    window.dispatchEvent(new Event("open-login-nudge"))
+                  }
+                  className="relative inline-flex items-center gap-2 bg-red-700/20 text-red-300 border border-red-700/40 px-3 py-2 rounded-xl hover:bg-red-700/30">
+                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-neutral-900" />
+                  <span className="h-2 w-2 rounded-full bg-red-500" />
+                  Please login to continue
+                </button>
+              )}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Main */}
       <div className="w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10 max-w-7xl">
-        {/* Bento grid: 1 col on mobile, 6 cols on desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-6 auto-rows-auto gap-6 lg:gap-8">
-          {/* Selected Turf Card — big tile */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 lg:col-span-2 lg:row-span-2">
-            <div className="p-2 h-full flex flex-col">
-              <div className="text-start mb-3 ml-1">
-                <div className="text-2xl font-unbounded font-bold text-white mb-1">
-                  {currTurf.name}
+        {/* ===== Bento grid =====
+           Mobile: 1 col, natural flow
+           Desktop (xl): EXACT placement (12 cols, 6 rows of equal height).
+           This avoids holes and keeps the center hero perfectly centered. */}
+        <div
+          className={[
+            "grid gap-4 sm:gap-6",
+            "grid-cols-1 xl:grid-cols-12",
+            // 6 equal rows at xl; items use row-start/end to fit with no gaps.
+            "xl:auto-rows-[180px]",
+            "relative",
+          ].join(" ")}>
+          {/* ---- Navigate (top-left), spans rows 1..3 ---- */}
+          <div className="xl:col-start-1 xl:col-end-5 xl:row-start-1 xl:row-end-4">
+            <BentoCard className="p-5 sm:p-6">
+              <div className="flex items-center mb-3">
+                <MousePointer2 className="w-5 h-5 mr-2 text-white/90" />
+                <h3 className="font-polysans text-xl font-semibold text-white">
+                  Navigate
+                </h3>
+              </div>
+              <div className="mt-1 flex items-center text-neutral-300 font-redhatmono">
+                <MapPin className="w-4 h-4 mr-2 text-neutral-400" />
+                <span className="truncate">{currTurf.location.address}</span>
+              </div>
+              <div className="mt-auto" />
+            </BentoCard>
+          </div>
+
+          {/* ---- KPIs (top-right), spans rows 1..2 ---- */}
+          <div className="xl:col-start-9 xl:col-end-13 xl:row-start-1 xl:row-end-3">
+            <BentoCard className="p-5 sm:p-6">
+              <h3 className="font-polysans text-xl font-semibold text-white">
+                Today’s Capacity
+              </h3>
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                <div className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3 text-center">
+                  <p className="font-polysans text-xl font-bold text-white">
+                    {timeSlots.length}
+                  </p>
+                  <p className="text-xs font-redhatmono text-neutral-400">
+                    Slots
+                  </p>
+                </div>
+                <div className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3 text-center">
+                  <p className="font-polysans text-xl font-bold text-white">
+                    {selectedSlots.length}
+                  </p>
+                  <p className="text-xs font-redhatmono text-neutral-400">
+                    Selected
+                  </p>
+                </div>
+                <div className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3 text-center">
+                  <p className="font-polysans text-xl font-bold text-white">
+                    ৳{totalAmount}
+                  </p>
+                  <p className="text-xs font-redhatmono text-neutral-400">
+                    Total
+                  </p>
                 </div>
               </div>
+              <div className="mt-auto" />
+            </BentoCard>
+          </div>
 
-              {/* Fixed, predictable heights for carousel improve packing */}
-              <div className="mb-4">
+          {/* ---- CENTRAL HERO: Turf card, rows 1..3 ---- */}
+          <div className="xl:col-start-5 xl:col-end-9 xl:row-start-1 xl:row-end-4">
+            <BentoCard className="p-5 sm:p-6">
+              <h2 className="font-polysans text-2xl sm:text-3xl font-bold text-white mb-3">
+                {currTurf.name}
+              </h2>
+              <div className="rounded-2xl overflow-hidden">
                 <TurfCarousel
                   images={currTurf.images}
-                  height="h-40 lg:h-48"
+                  height="h-48 xl:h-56"
                   altBase={`${currTurf.name} photo`}
                   showDots
                   showArrows
                 />
               </div>
-
-              <div className="font-redhatmono text-sm text-neutral-300">
-                <span className="text-yellow">5v5</span> field. This turf truly
-                tests your stamina considering you can play with no outs. If you
-                are looking for a fast-paced futsal field, this is the perfect
-                choice.
-              </div>
-            </div>
+              <p className="mt-4 font-redhatmono text-sm text-neutral-300">
+                <span className="text-yellow font-semibold">5v5</span>{" "}
+                fast-paced futsal • 90-min slots
+              </p>
+            </BentoCard>
           </div>
 
-          {/* Navigate — small tile */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-2 lg:col-span-2">
-            <div className="text-lg sm:text-xl font-polysans font-semibold text-white mb-2 flex flex-row justify-start items-center">
-              <MousePointer2 className="rotate-45 w-4 h-5 mr-2 fill-almostwhite" />
-              Navigate
-            </div>
-            <div className="flex items-center space-x-2 text-neutral-300 font-redhatmono text-sm sm:text-base">
-              <MapPin className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
-              <span className="truncate">{currTurf.location.address}</span>
-            </div>
-          </div>
-
-          {/* Booking Summary — Desktop tile */}
-          {selectedSlots.length > 0 && (
-            <div className="hidden lg:block bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 lg:col-span-2 lg:row-span-2 lg:sticky lg:top-6 self-start">
-              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
-                Booking Summary
-              </h2>
-              <BookingSummary
-                selectedSlots={selectedSlots}
-                currTurf={currTurf}
-                totalAmount={totalAmount}
-                isMobile={false}
-              />
-            </div>
-          )}
-
-          {/* Booking Summary — Mobile only tile (kept after Navigate) */}
-          {selectedSlots.length > 0 && (
-            <div className="block lg:hidden bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white mb-3 sm:mb-4">
-                Booking Summary
-              </h2>
-              <BookingSummary
-                selectedSlots={selectedSlots}
-                currTurf={currTurf}
-                totalAmount={totalAmount}
-                isMobile={true}
-              />
-            </div>
-          )}
-
-          {/* Time Slots Grid — large tile */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 lg:col-span-4 lg:row-span-3 max-h-[70vh] overflow-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
-              <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white flex items-center">
-                <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-yellow mr-2" />
-                <span className="hidden sm:inline">
-                  Available Slots (90 minutes each)
-                </span>
-                <span className="sm:hidden">Time Slots</span>
-              </h2>
-              <div className="flex items-center space-x-3 sm:space-x-6 text-xs sm:text-sm font-redhatmono">
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <div className="w-3 sm:w-4 h-3 sm:h-4 bg-neutral-800 border-2 border-neutral-600 rounded"></div>
-                  <span className="text-neutral-400">Available</span>
-                </div>
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <div className="w-3 sm:w-4 h-3 sm:h-4 bg-green rounded"></div>
-                  <span className="text-neutral-400">Selected</span>
-                </div>
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <div className="w-3 sm:w-4 h-3 sm:h-4 bg-red-900 border border-red-700 rounded"></div>
-                  <span className="text-neutral-400">Booked</span>
+          {/* ---- TIME SLOTS: bottom-left, rows 4..6 ---- */}
+          <div className="xl:col-start-1 xl:col-end-9 xl:row-start-4 xl:row-end-7">
+            <BentoCard className="p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+                <h2 className="text-lg sm:text-xl font-polysans font-semibold text-white">
+                  Available Slots
+                </h2>
+                <div className="flex items-center space-x-4 text-xs sm:text-sm font-redhatmono text-neutral-400">
+                  <span className="flex items-center">
+                    <span className="w-3 h-3 mr-2 rounded border border-neutral-500 inline-block" />
+                    Available
+                  </span>
+                  <span className="flex items-center">
+                    <span className="w-3 h-3 mr-2 rounded bg-green inline-block" />
+                    Selected
+                  </span>
+                  <span className="flex items-center">
+                    <span className="w-3 h-3 mr-2 rounded bg-red-900 inline-block" />
+                    Booked
+                  </span>
                 </div>
               </div>
-            </div>
 
-            {/* Horizontal scroll only below lg; desktop packs naturally */}
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <div className="flex flex-col gap-1 sm:gap-2 md:min-w-[700px] lg:min-w-0 px-4 sm:px-0">
-                {/* Header Row with Days */}
-                <div className="flex">
-                  <div className="flex-shrink-0 w-20 sm:w-24"></div>
-                  {weekDates.map((day: WeekDate, index: number) => (
-                    <div
-                      key={index}
-                      className="flex-1 text-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 p-1 sm:p-2">
-                      <span className="sm:hidden">{day.day}</span>
-                      <span className="hidden sm:inline">
-                        {day.day} {day.date}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Time Slot Rows */}
-                {timeSlots.map((slot: TimeSlot) => (
-                  <div
-                    key={slot.id}
-                    className="flex">
-                    <div className="flex-shrink-0 w-20 sm:w-24 flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-2">
-                      <span className="sm:hidden">
-                        {slot.start.replace(" ", "")}
-                      </span>
-                      <span className="hidden sm:inline">{slot.start}</span>
-                    </div>
-                    {weekDates.map((day: WeekDate) => (
+              {/* Scrollable content so the tile never grows and the grid stays gapless */}
+              <div className="grow overflow-x-auto -mx-2 sm:mx-0">
+                <div className="flex flex-col gap-1 sm:gap-2 md:min-w-[700px] xl:min-w-0 px-2 sm:px-0">
+                  {/* Days header */}
+                  <div className="flex">
+                    <div className="flex-shrink-0 w-20 sm:w-24" />
+                    {weekDates.map((day, index) => (
                       <div
-                        key={`${day.fullDate}-${slot.id}`}
-                        className="flex-1 px-1">
-                        <button
-                          onClick={() =>
-                            toggleSlot(day.fullDate, slot.id, slot)
-                          }
-                          className={`w-full p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium border-2 rounded-lg sm:rounded-xl transition-all ${getSlotButtonClass(
-                            day.fullDate,
-                            slot.id
-                          )}`}
-                          disabled={
-                            getSlotAvailability(day.fullDate, slot.id) !==
-                              "available" &&
-                            !isSlotSelected(day.fullDate, slot.id)
-                          }>
-                          <span className="sm:hidden">•</span>
-                          <span className="hidden sm:inline">{slot.start}</span>
-                        </button>
+                        key={index}
+                        className="flex-1 text-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-400 p-1 sm:p-2">
+                        <span className="sm:hidden">{day.day}</span>
+                        <span className="hidden sm:inline">
+                          {day.day} {day.date}
+                        </span>
                       </div>
                     ))}
                   </div>
-                ))}
+
+                  {/* Rows */}
+                  {timeSlots.map((slot) => (
+                    <div
+                      key={slot.id}
+                      className="flex">
+                      <div className="flex-shrink-0 w-20 sm:w-24 flex items-center text-xs sm:text-sm font-redhatmono font-medium text-neutral-300 p-1 sm:p-2">
+                        <span className="sm:hidden">
+                          {slot.start.replace(" ", "")}
+                        </span>
+                        <span className="hidden sm:inline">{slot.start}</span>
+                      </div>
+                      {weekDates.map((day) => (
+                        <div
+                          key={`${day.fullDate}-${slot.id}`}
+                          className="flex-1 px-1">
+                          <button
+                            onClick={() =>
+                              toggleSlot(day.fullDate, slot.id, slot)
+                            }
+                            className={[
+                              "w-full p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium",
+                              "border-2 rounded-lg sm:rounded-xl transition-all",
+                              getSlotButtonClass(day.fullDate, slot.id),
+                            ].join(" ")}
+                            disabled={
+                              getSlotAvailability(day.fullDate, slot.id) !==
+                                "available" &&
+                              !isSlotSelected(day.fullDate, slot.id)
+                            }>
+                            <span className="sm:hidden">•</span>
+                            <span className="hidden sm:inline">
+                              {slot.start}
+                            </span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </BentoCard>
           </div>
-          {/* End Time Slots tile */}
+
+          {/* ---- RIGHT COLUMN: Summary (rows 3..6) OR Reviews ---- */}
+          {hasSummary ? (
+            <>
+              {/* Desktop sticky summary */}
+              <div className="hidden xl:block xl:col-start-9 xl:col-end-13 xl:row-start-3 xl:row-end-7">
+                <BentoCard className="p-5 sm:p-6 sticky top-6">
+                  <h2 className="text-xl font-polysans font-semibold text-white mb-3">
+                    Booking Summary
+                  </h2>
+                  <BookingSummary
+                    selectedSlots={selectedSlots}
+                    currTurf={currTurf}
+                    totalAmount={totalAmount}
+                  />
+                </BentoCard>
+              </div>
+
+              {/* Mobile summary (stacks naturally) */}
+              <div className="xl:hidden">
+                <BentoCard className="p-5 sm:p-6">
+                  <h2 className="text-xl font-polysans font-semibold text-white mb-3">
+                    Booking Summary
+                  </h2>
+                  <BookingSummary
+                    selectedSlots={selectedSlots}
+                    currTurf={currTurf}
+                    totalAmount={totalAmount}
+                    isMobile
+                  />
+                </BentoCard>
+              </div>
+            </>
+          ) : (
+            // If nothing selected, keep grid full with Reviews
+            <div className="xl:col-start-9 xl:col-end-13 xl:row-start-3 xl:row-end-7">
+              <ReviewsCard />
+            </div>
+          )}
         </div>
       </div>
     </div>
