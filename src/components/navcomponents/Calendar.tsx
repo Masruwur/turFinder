@@ -23,7 +23,7 @@ interface CalendarProps {
   isOpen: boolean;
   onClose: () => void;
   onDateSelect?: (date: Date) => void;
-  bookings?: Record<string, Booking[]>; // Optional prop for sample data
+  bookings?: Record<string, Booking[]>;
 }
 
 export default function Calendar({
@@ -167,27 +167,26 @@ export default function Calendar({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 bg-black/70 items-center justify-center z-50 hidden"
+      className="fixed top-0 height-100dvh left-0 right-0 bottom-0 bg-black/70 items-center justify-center z-50 hidden p-2 sm:p-4 overflow-auto"
       onClick={handleOverlayClick}>
       <div
         ref={cardRef}
-        className="w-19/20 max-w-3xl bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-700">
+        className="w-full max-w-3xl max-h-[85vh] bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-700 my-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 bg-gray-800 border-b border-gray-700 w-full">
-          <div className="gap-2 flex justify-evenly">
+          <div className="flex items-center justify-evenly">
             <button
-              className=" text-white text-xl hover:bg-gray-700 rounded-lg transition-colors"
+              className=" text-white text-xl hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
               onClick={() => navigateMonth("prev")}
               aria-label="Previous month">
               ‹
             </button>
-
-            <div className="text-xl font-bold text-white">
+            <div className="text-xl font-bold text-white w-52 text-center">
               {formatMonth(currentDate)} {currentDate.getFullYear()}
             </div>
 
             <button
-              className="text-white text-xl hover:bg-gray-700 rounded-lg transition-colors"
+              className="text-white text-xl hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
               onClick={() => navigateMonth("next")}
               aria-label="Next month">
               ›
@@ -197,8 +196,8 @@ export default function Calendar({
           {!signedIn ? (
             <button
               onClick={signIn}
-              className="p-2 text-sm font-redhatmono bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors">
-              Google Calendar
+              className="p-1.5 text-sm font-redhatmono bg-blue-600 rounded-sm text-white font-medium transition-colors">
+              Google
             </button>
           ) : (
             <button
