@@ -27,7 +27,6 @@ export default function Login({
     setUser(null);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
-    toggleProfile();
   };
 
   return (
@@ -111,7 +110,11 @@ export default function Login({
                 {/* login button */}
                 <div className="flex justify-center">
                   <button
-                    onClick={() => handleLogin(email, password)}
+                    onClick={() => {
+                      handleLogin(email, password)
+                      setEmail("")
+                      setPassword("")
+                    }}
                     className="w-min rounded-2xl py-3 px-4 hover:bg-blue-600 text-black hover:text-white transition-colors font-medium cursor-pointer duration-300">
                     Login
                   </button>

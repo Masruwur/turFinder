@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect ,useRef } from "react";
 import {
   MapPin,
   Users,
@@ -14,11 +14,29 @@ import {
   BellRing,
   Gift,
 } from "lucide-react";
-import NavBar from "../components/NavBar";
+import NavBar,{NavBarRef} from "../components/NavBar";
 import TurfCarousel from "../components/TurfCarousel";
 import { TurfEntity } from "../data/mockData";
 import { redirect, useLocation } from "react-router";
 import { useUser } from "../util/user";
+import api from "../util/api";
+import MapComponent from "../util/map";
+
+interface Review{
+  id:number;
+  rating:number;
+  text:string;
+  user_id:number;
+  user_name:string;
+  created_at:string;
+}
+
+interface Booking{
+  startTime: string;
+  endTime: string;
+  date: string;
+  status: string;
+}
 
 interface WeekDate {
   date: number;
@@ -36,11 +54,26 @@ interface SelectedSlot {
   date: string;
   slotId: string;
   slot: TimeSlot;
+  price: number;
 }
 type SlotAvailability = "available" | "booked" | "unavailable";
 
-function LoginNudge() {
+const weekDayMap: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+};
+
+
+function LoginNudge({ triggerNavBarAction }: { triggerNavBarAction: () => void }) {
   const [open, setOpen] = useState(false);
+
+  // Ref to NavBar to toggle profile
+  const navRef = useRef<NavBarRef>(null);
 
   useEffect(() => {
     const onOpen = () => setOpen(true);
@@ -126,12 +159,14 @@ function LoginNudge() {
                   className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 hover:bg-neutral-800">
                   Later
                 </button>
-                <a
-                  href="/login"
+                <button onClick={()=>{
+                    setOpen(false);
+                    triggerNavBarAction();
+                }}
                   className="px-3 py-2 rounded-xl bg-green text-white hover:bg-darkgreen flex items-center gap-2">
                   <LogIn className="w-4 h-4" />
                   Sign in
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -158,25 +193,34 @@ function BentoCard({
   );
 }
 
-function ReviewsCard() {
-  const reviews = [
-    { name: "mhr", msg: "Super clean turf & smooth booking." },
-    { name: "rhd", msg: "Lighting was great for night play!" },
-    { name: "mas", msg: "Friendly staff + quick check-in." },
-  ];
+function ReviewsCard(id : {id:number}) {
+  const [reviews,setReviews] = useState<Review[]>([]);
+  //fetching real reviews
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try{const response = await api.get(`/turfs/reviews/${id.id}`);
+          setReviews(response.data); 
+      }catch(error){
+        console.error("Error fetching reviews:", error);
+     }  
+    }
+    fetchReviews();
+      
+  }, []);
+  
   return (
     <BentoCard className="p-5 sm:p-6">
       <h3 className="flex justify-center font-polysans text-xl font-semibold text-white">
         Reviews
       </h3>
       <div className="mt-4 space-y-3">
-        {reviews.map((r, i) => (
+        {reviews && reviews.map((review) => (
           <div
-            key={i}
+            key={review.id}
             className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3">
             <p className="font-polysans text-sm text-neutral-200">
-              <span className="font-semibold text-white">{r.name}</span> —{" "}
-              {r.msg}
+              <span className="font-semibold text-white">{review.user_name}</span> —{" "}
+              {review.text}
             </p>
           </div>
         ))}
@@ -195,7 +239,7 @@ function BookingSummary({
   selectedSlots,
   currTurf,
   totalAmount,
-  isMobile = false,
+  isMobile = false
 }: BookingSummaryProps) {
   if (selectedSlots.length === 0) return null;
 
@@ -211,7 +255,7 @@ function BookingSummary({
               {currTurf.name}
             </h3>
             <p className="text-xs sm:text-sm font-redhatmono text-neutral-400">
-              90 minutes per slot
+              {currTurf.slotDuration} minutes per slot
             </p>
           </div>
         </div>
@@ -227,10 +271,6 @@ function BookingSummary({
         <div className="flex justify-between">
           <span className="text-neutral-400">Selected Slots:</span>
           <span className="font-medium text-white">{selectedSlots.length}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-neutral-400">Price per Slot:</span>
-          <span className="font-medium text-white">&#2547;50</span>
         </div>
       </div>
 
@@ -259,6 +299,9 @@ function BookingSummary({
               </div>
               <div className="font-redhatmono text-neutral-400">
                 {slot.slot.start} - {slot.slot.end}
+              </div>
+              <div className="font-redhatmono text-neutral-400 text-yellow">
+                Price: &#2547;{slot.price}
               </div>
             </div>
           ))}
@@ -302,9 +345,71 @@ export default function TurfBooking() {
   const { user } = useUser();
   const location = useLocation();
   const currTurf: TurfEntity = location.state;
+  const [bookingSet, setBookingSet] = useState<Set<string>>(new Set()); 
 
   const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
+  const [totalAmount,setTotalAmount] = useState<number>(0);
+
+  // Ref to NavBar to toggle profile
+  const navRef = useRef<NavBarRef>(null);
+ 
+  //fetch actual bookings
+  useEffect(()=>{
+    const fetchBookings = async () => {
+      try{const response = await api.get(`/booking/${currTurf.id}`);
+ 
+          const booked = new Set<string>();
+          response.data.forEach((booking:Booking) => {
+            booked.add(JSON.stringify({date: booking.date, start: booking.startTime , end: booking.endTime}));
+          });
+          setBookingSet(booked);
+      }catch(error){
+        console.error("Error fetching bookings:", error);
+     }
+    }
+    fetchBookings();
+  },[]);
+
+  
+
+  //navigate to maps
+  const handleNavigateClick = (lat:number,lng:number) => {
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    window.open(url, "_blank"); // opens in a new tab
+  };
+
+  //24 hour converter
+  const ampmTo24 = (timeStr:string)=> {
+      let [time, modifier] = timeStr.split(" ");
+      let [hours, minutes] = time.split(":").map(Number);
+
+      if (modifier === "PM" && hours !== 12) hours += 12;
+      if (modifier === "AM" && hours === 12) hours = 0;
+
+      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`;
+  }
+
+  const timeToMinutes = (timeStr:string) => {
+    const [h, m, s] = timeStr.split(":").map(Number);
+    return h*60+ m;
+ }
+
+  const inTimeRange = (slot:TimeSlot, startTime:string, endTime:string) => {
+      return (timeToMinutes(ampmTo24(slot.start)) >= timeToMinutes(startTime) && timeToMinutes(ampmTo24(slot.end)) <= timeToMinutes(endTime));
+
+  }
+
+  //slot price calculation
+   const slotPrice = (day:string,slot:TimeSlot)=>{
+      for(const price of currTurf.prices){
+        if(price.startDay <= weekDayMap[day] && weekDayMap[day] <= price.endDay){
+          if(inTimeRange(slot,price.startHour,price.endHour)) return price.pricePerHour;
+        }
+      }
+
+      return 0;
+   }
 
   // Week dates
   const getWeekDates = (weekOffset: number = 0): WeekDate[] => {
@@ -358,47 +463,43 @@ export default function TurfBooking() {
   const weekDates = getWeekDates(currentWeekOffset);
   const timeSlots = generateTimeSlots();
 
-  const getSeededRandom = (seed: string): number => {
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      const char = seed.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    // Convert to 0-1 range
-    return Math.abs(hash) / 2147483647;
-  };
-
-  // Mock availability
+  //availability
   const getSlotAvailability = (
-    date: string,
-    slotId: string
+    date: string, slot:TimeSlot
   ): SlotAvailability => {
-    const seed = `${date}-${slotId}-${currTurf.id}`; // Include turf ID for consistency
-    const random = getSeededRandom(seed);
+        if (
+        bookingSet.has(
+          JSON.stringify({
+            date,
+            start: ampmTo24(slot.start),
+            end: ampmTo24(slot.end),
+          })
+        )
+       ) 
+        return "booked"; 
 
-    if (random > 0.7) return "booked";
-    if (random > 0.85) return "unavailable";
     return "available";
   };
+
+  
 
   const isSlotSelected = (date: string, slotId: string) =>
     selectedSlots.some((s) => s.date === date && s.slotId === slotId);
 
-  const toggleSlot = (date: string, slotId: string, slot: TimeSlot) => {
+  const toggleSlot = (date: string, slotId: string, slot: TimeSlot,price:number) => {
     const already = isSlotSelected(date, slotId);
     if (already) {
       setSelectedSlots((prev) =>
         prev.filter((s) => !(s.date === date && s.slotId === slotId))
       );
-    } else if (getSlotAvailability(date, slotId) === "available") {
-      setSelectedSlots((prev) => [...prev, { date, slotId, slot }]);
+    } else if (getSlotAvailability(date, slot) === "available") {
+      setSelectedSlots((prev) => [...prev, { date, slotId, slot,price }]);
     }
   };
 
-  const getSlotButtonClass = (date: string, slotId: string): string => {
-    const availability = getSlotAvailability(date, slotId);
-    const active = isSlotSelected(date, slotId);
+  const getSlotButtonClass = (date: string, slot: TimeSlot): string => {
+    const availability = getSlotAvailability(date, slot);
+    const active = isSlotSelected(date, slot.id);
     if (active) return "bg-green text-white border-green";
     if (availability === "booked")
       return "bg-red-900 text-red-300 border-red-800 cursor-not-allowed";
@@ -407,15 +508,14 @@ export default function TurfBooking() {
     return "bg-neutral-900 text-neutral-300 border-neutral-600 hover:border-yellow hover:bg-darkgreen hover:text-white cursor-pointer";
   };
 
-  const totalAmount = selectedSlots.length * 1750;
   const hasSummary = selectedSlots.length > 0;
 
   return (
     <div className="min-h-screen bg-black text-neutral-100">
-      <NavBar />
+      <NavBar ref={navRef}/>
 
       {/* Render the floating red-dot button only when logged out */}
-      {!user && <LoginNudge />}
+      {!user && <LoginNudge triggerNavBarAction={()=>{navRef.current?.toggleProfile()}} />}
 
       {/* Header (replace your snippet with this so it also opens the pop-up) */}
       <div className="relative md:h-17.5 rounded-b-2xl z-10 border-b border-neutral-800 bg-neutral-900/80">
@@ -462,10 +562,14 @@ export default function TurfBooking() {
             <BentoCard className="p-5 sm:p-6">
               <div className="flex items-center mb-3">
                 <MousePointer2 className="w-5 h-5 mr-2 text-white/90" />
-                <h3 className="font-polysans text-xl font-semibold text-white">
+                <h3 className="font-polysans text-xl font-semibold text-white cursor-pointer" onClick={() => handleNavigateClick(currTurf.location.latitude,currTurf.location.longitude)}>
                   Navigate
                 </h3>
               </div>
+              <div>
+                <MapComponent lat={currTurf.location.latitude} lng={currTurf.location.longitude}/>
+              </div>
+
               <div className="mt-1 flex items-center text-neutral-300 font-redhatmono">
                 <MapPin className="w-4 h-4 mr-2 text-neutral-400" />
                 <span className="truncate">{currTurf.location.address}</span>
@@ -478,12 +582,12 @@ export default function TurfBooking() {
           <div className="xl:col-start-9 xl:col-end-13 xl:row-start-1 xl:row-end-2">
             <BentoCard className="p-5 sm:p-6">
               <h3 className="flex justify-center font-polysans text-xl font-semibold text-white">
-                Today’s Capacity
+                This week’s Capacity
               </h3>
               <div className="grid grid-cols-3 gap-3 mt-4">
                 <div className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3 text-center">
                   <p className="font-polysans text-xl font-bold text-white">
-                    {timeSlots.length}
+                    {77-bookingSet.size}
                   </p>
                   <p className="text-xs font-redhatmono text-neutral-400">
                     Slots
@@ -526,8 +630,8 @@ export default function TurfBooking() {
                 />
               </div>
               <p className="mt-4 font-redhatmono text-sm text-neutral-300">
-                <span className="text-yellow font-semibold">5v5</span>{" "}
-                fast-paced futsal • 90-min slots
+                <span className="text-yellow font-semibold"></span>{" "}
+                {currTurf.description} • {currTurf.slotDuration}-min slots
               </p>
             </BentoCard>
           </div>
@@ -589,16 +693,22 @@ export default function TurfBooking() {
                           key={`${day.fullDate}-${slot.id}`}
                           className="flex-1 px-1">
                           <button
-                            onClick={() =>
-                              toggleSlot(day.fullDate, slot.id, slot)
+                            onClick={() =>{
+                              if(!isSlotSelected(day.fullDate, slot.id)){
+                                 let price = slotPrice(day.day,slot);
+                                 toggleSlot(day.fullDate, slot.id, slot,price);
+                                 setTotalAmount(totalAmount + price);
+                              }
+                              else toggleSlot(day.fullDate, slot.id, slot,-1);   
+                            }
                             }
                             className={[
                               "w-full p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium",
                               "border-2 rounded-lg sm:rounded-xl transition-all",
-                              getSlotButtonClass(day.fullDate, slot.id),
+                              getSlotButtonClass(day.fullDate, slot),
                             ].join(" ")}
                             disabled={
-                              getSlotAvailability(day.fullDate, slot.id) !==
+                              getSlotAvailability(day.fullDate, slot) !==
                                 "available" &&
                               !isSlotSelected(day.fullDate, slot.id)
                             }>
@@ -618,7 +728,7 @@ export default function TurfBooking() {
           {hasSummary ? (
             <>
               <div className="xl:col-start-9 xl:col-end-13 xl:row-start-2 xl:row-end-4">
-                <ReviewsCard />
+                <ReviewsCard id={currTurf.id} />
               </div>
               {/* Desktop sticky summary */}
               <div className="hidden xl:block xl:col-start-9 xl:col-end-13 xl:row-start-4 xl:row-end-8">
@@ -652,7 +762,7 @@ export default function TurfBooking() {
           ) : (
             // If nothing selected, keep grid full with Reviews
             <div className="xl:col-start-9 xl:col-end-13 xl:row-start-2 xl:row-end-4">
-              <ReviewsCard />
+              <ReviewsCard id={currTurf.id} />
             </div>
           )}
         </div>
@@ -660,3 +770,5 @@ export default function TurfBooking() {
     </div>
   );
 }
+
+
