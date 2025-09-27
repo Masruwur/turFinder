@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef,forwardRef,useImperativeHandle } from "react";
 import "../index.css";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/turfinderlogo.png";
@@ -11,7 +11,7 @@ import SignUp from "./navcomponents/authcomponents/SignUp";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
-import CommandSearch from "./CommandSearch";
+//import CommandSearch from "./CommandSearch";
 import Calendar from "./navcomponents/Calendar";
 import api from "../util/api";
 import { useUser } from "../util/user";
@@ -19,7 +19,14 @@ import { User } from "../util/user";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-export default function NavBar() {
+export type NavBarRef = {
+  toggleProfile: () => void;
+};
+
+
+  const NavBar = forwardRef<NavBarRef>((props,ref) => {
+  
+
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
@@ -29,6 +36,10 @@ export default function NavBar() {
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
 
   const { setUser } = useUser();
+
+   useImperativeHandle(ref, () => ({
+    toggleProfile: () => toggleProfile(),
+   }));
 
   const handleCalendarClick = (): void => {
     setIsCalendarOpen(!isCalendarOpen);
@@ -99,8 +110,7 @@ export default function NavBar() {
           email: response.data.email
         };
         setUser(user);
-        localStorage.setItem("user",JSON.stringify(user));  
-        setIsProfileOpen(false);
+        localStorage.setItem("user",JSON.stringify(user));
       }
     }catch(error){
       console.error("Login failed:",error);
@@ -270,4 +280,6 @@ export default function NavBar() {
       </div>
     </>
   );
-}
+});
+
+export default NavBar;
