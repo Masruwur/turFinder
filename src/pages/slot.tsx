@@ -364,6 +364,7 @@ export default function TurfBooking() {
             booked.add(JSON.stringify({date: booking.date, start: booking.startTime , end: booking.endTime}));
           });
           setBookingSet(booked);
+          console.log(currTurf.prices)
       }catch(error){
         console.error("Error fetching bookings:", error);
      }
@@ -395,10 +396,19 @@ export default function TurfBooking() {
     return h*60+ m;
  }
 
-  const inTimeRange = (slot:TimeSlot, startTime:string, endTime:string) => {
-      return (timeToMinutes(ampmTo24(slot.start)) >= timeToMinutes(startTime) && timeToMinutes(ampmTo24(slot.end)) <= timeToMinutes(endTime));
+  const inTimeRange = (slot: TimeSlot, startTime: string, endTime: string) => {
+      let slotStart = timeToMinutes(ampmTo24(slot.start));
+      let slotEnd = timeToMinutes(ampmTo24(slot.end));
+      let start = timeToMinutes(startTime);
+      let end = timeToMinutes(endTime);
 
-  }
+      // handle slots that span midnight
+      if (slotEnd <= slotStart) slotEnd += 24 * 60; 
+      if (end <= start) end += 24 * 60;
+
+      return slotStart >= start && slotEnd <= end;
+};
+
 
   //slot price calculation
    const slotPrice = (day:string,slot:TimeSlot)=>{
@@ -433,32 +443,36 @@ export default function TurfBooking() {
 
   // 90-minute slots, 6:00 → 22:30 end
   const generateTimeSlots = (): TimeSlot[] => {
-    const slots: TimeSlot[] = [];
-    for (let hour = 7; hour <= 22; hour += 1.5) {
-      const startHour = Math.floor(hour);
-      const startMinute = (hour % 1) * 60;
-      const endHour = Math.floor(hour + 1.5);
-      const endMinute = ((hour + 1.5) % 1) * 60;
+  const slots: TimeSlot[] = [];
 
-      const fmt = (h: number, m: number) => {
-        const period = h >= 12 ? "PM" : "AM";
-        const displayHour = h > 12 ? h - 12 : h === 0 ? 12 : h;
-        // Add zero padding to hours
-        const paddedHour = displayHour.toString().padStart(2, "0");
-        return `${paddedHour}:${m.toString().padStart(2, "0")} ${period}`;
-      };
+  for (let hour = 6.5; hour < 24; hour += 1.5) { 
+    const startHour = Math.floor(hour) % 24;
+    const startMinute = (hour % 1) * 60;
 
-      slots.push({
-        id: `${startHour}-${startMinute}`,
-        start: fmt(startHour, startMinute),
-        end: fmt(endHour, endMinute),
-        time24: `${startHour.toString().padStart(2, "0")}:${startMinute
-          .toString()
-          .padStart(2, "0")}`,
-      });
-    }
-    return slots;
-  };
+    const endHour = Math.floor(hour + 1.5) % 24;
+    const endMinute = ((hour + 1.5) % 1) * 60;
+
+    const fmt = (h: number, m: number) => {
+      const period = h >= 12 ? "PM" : "AM";
+      const displayHour = h % 12 === 0 ? 12 : h % 12;
+      return `${displayHour.toString().padStart(2, "0")}:${m
+        .toString()
+        .padStart(2, "0")} ${period}`;
+    };
+
+    slots.push({
+      id: `${startHour}-${startMinute}`,
+      start: fmt(startHour, startMinute),
+      end: fmt(endHour, endMinute),
+      time24: `${startHour.toString().padStart(2, "0")}:${startMinute
+        .toString()
+        .padStart(2, "0")}`,
+    });
+  }
+
+  return slots;
+};
+
 
   const weekDates = getWeekDates(currentWeekOffset);
   const timeSlots = generateTimeSlots();
@@ -489,10 +503,12 @@ export default function TurfBooking() {
   const toggleSlot = (date: string, slotId: string, slot: TimeSlot,price:number) => {
     const already = isSlotSelected(date, slotId);
     if (already) {
+      setTotalAmount(totalAmount - price);
       setSelectedSlots((prev) =>
         prev.filter((s) => !(s.date === date && s.slotId === slotId))
       );
     } else if (getSlotAvailability(date, slot) === "available") {
+      setTotalAmount(totalAmount + price);
       setSelectedSlots((prev) => [...prev, { date, slotId, slot,price }]);
     }
   };
@@ -587,7 +603,7 @@ export default function TurfBooking() {
               <div className="grid grid-cols-3 gap-3 mt-4">
                 <div className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3 text-center">
                   <p className="font-polysans text-xl font-bold text-white">
-                    {77-bookingSet.size}
+                    {84-bookingSet.size}
                   </p>
                   <p className="text-xs font-redhatmono text-neutral-400">
                     Slots
@@ -694,13 +710,8 @@ export default function TurfBooking() {
                           className="flex-1 px-1">
                           <button
                             onClick={() =>{
-                              if(!isSlotSelected(day.fullDate, slot.id)){
                                  let price = slotPrice(day.day,slot);
-                                 toggleSlot(day.fullDate, slot.id, slot,price);
-                                 setTotalAmount(totalAmount + price);
-                              }
-                              else toggleSlot(day.fullDate, slot.id, slot,-1);   
-                            }
+                                 toggleSlot(day.fullDate, slot.id, slot,price);}
                             }
                             className={[
                               "w-full p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium",
