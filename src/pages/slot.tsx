@@ -1,4 +1,4 @@
-import { useState, useEffect ,useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   MapPin,
   Users,
@@ -7,14 +7,10 @@ import {
   Phone,
   MousePointer2,
   X,
-  LogIn,
-  CheckCircle2,
-  ShieldCheck,
-  Clock,
   BellRing,
-  Gift,
+  FunctionSquareIcon,
 } from "lucide-react";
-import NavBar,{NavBarRef} from "../components/NavBar";
+import NavBar, { NavBarRef } from "../components/NavBar";
 import TurfCarousel from "../components/TurfCarousel";
 import { TurfEntity } from "../data/mockData";
 import { redirect, useLocation } from "react-router";
@@ -22,16 +18,25 @@ import { useUser } from "../util/user";
 import api from "../util/api";
 import MapComponent from "../util/map";
 
-interface Review{
-  id:number;
-  rating:number;
-  text:string;
-  user_id:number;
-  user_name:string;
-  created_at:string;
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
+interface ReviewProps {
+  id: number;
+  rating: number;
+  text: string;
+  user_id: number;
+  user_name: string;
+  created_at: string;
 }
 
-interface Booking{
+interface Booking {
   startTime: string;
   endTime: string;
   date: string;
@@ -68,8 +73,11 @@ const weekDayMap: Record<string, number> = {
   Sat: 6,
 };
 
-
-function LoginNudge({ triggerNavBarAction }: { triggerNavBarAction: () => void }) {
+function LoginNudge({
+  triggerNavBarAction,
+}: {
+  triggerNavBarAction: () => void;
+}) {
   const [open, setOpen] = useState(false);
 
   // Ref to NavBar to toggle profile
@@ -93,7 +101,7 @@ function LoginNudge({ triggerNavBarAction }: { triggerNavBarAction: () => void }
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-50 font-redhatmono">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setOpen(false)}
@@ -101,14 +109,11 @@ function LoginNudge({ triggerNavBarAction }: { triggerNavBarAction: () => void }
           <div className="absolute bottom-6 right-6 w-[92vw] max-w-sm rounded-3xl bg-neutral-950 border border-neutral-800 shadow-2xl overflow-hidden">
             <div className="p-4 border-b border-neutral-800 flex items-start justify-between">
               <div>
-                <div className="text-[11px] tracking-widest text-green-400/80">
-                  NEW
-                </div>
                 <h3 className="text-lg font-polysans font-semibold text-white">
-                  Why sign in matters
+                  why sign in?
                 </h3>
                 <p className="text-neutral-400 text-sm mt-1">
-                  Keep your selections, pay faster, and never miss a match.
+                  2 clicks from login to book a slot and play
                 </p>
               </div>
               <button
@@ -120,51 +125,32 @@ function LoginNudge({ triggerNavBarAction }: { triggerNavBarAction: () => void }
             </div>
 
             <div className="p-4 space-y-3">
-              <div className="rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-900/60">
-                <img
-                  src={
-                    /* fallback tiny banner */ "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
-                  }
-                  alt=""
-                  className="h-32 w-full object-cover"
-                />
-              </div>
-
-              <ul className="space-y-2 text-sm text-neutral-300">
+              <ul className="space-y-2 text-sm text-white">
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green" />
                   <span>Save and resume bookings across devices</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Clock className="w-4 h-4 text-yellow" />
-                  <span>Get reminders and reschedule updates instantly</span>
+                  <span>Secure payments with saved receipts</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <ShieldCheck className="w-4 h-4 text-blue-400" />
-                  <span>Secure payments with receipts in one place</span>
+                  <span>Get reminders and updates instantly</span>
                 </li>
               </ul>
             </div>
 
-            <div className="px-4 py-3 border-t border-neutral-800 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-neutral-400">
-                <div className="h-7 w-7 rounded-full bg-neutral-900 border border-neutral-800 grid place-items-center">
-                  <Gift className="w-4 h-4 text-neutral-200" />
-                </div>
-                Perks, faster checkout, saved teams
-              </div>
+            <div className="px-4 py-3 border-t border-neutral-800 flex justify-end">
               <div className="flex gap-2">
                 <button
                   onClick={() => setOpen(false)}
                   className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 hover:bg-neutral-800">
                   Later
                 </button>
-                <button onClick={()=>{
+                <button
+                  onClick={() => {
                     setOpen(false);
                     triggerNavBarAction();
-                }}
+                  }}
                   className="px-3 py-2 rounded-xl bg-green text-white hover:bg-darkgreen flex items-center gap-2">
-                  <LogIn className="w-4 h-4" />
                   Sign in
                 </button>
               </div>
@@ -193,38 +179,90 @@ function BentoCard({
   );
 }
 
-function ReviewsCard(id : {id:number}) {
-  const [reviews,setReviews] = useState<Review[]>([]);
-  //fetching real reviews
+function ReviewsCard({ id }: { id: number | string }) {
+  const [reviews, setReviews] = useState<ReviewProps[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchReviews = async () => {
-      try{const response = await api.get(`/turfs/reviews/${id.id}`);
-          setReviews(response.data); 
-      }catch(error){
+      try {
+        setLoading(true);
+        const response = await api.get(`/turfs/reviews/${id}`);
+        setReviews(response.data);
+      } catch (error) {
         console.error("Error fetching reviews:", error);
-     }  
-    }
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchReviews();
-      
-  }, []);
-  
-  return (
-    <BentoCard className="p-5 sm:p-6">
-      <h3 className="flex justify-center font-polysans text-xl font-semibold text-white">
-        Reviews
-      </h3>
-      <div className="mt-4 space-y-3">
-        {reviews && reviews.map((review) => (
-          <div
-            key={review.id}
-            className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3">
-            <p className="font-polysans text-sm text-neutral-200">
-              <span className="font-semibold text-white">{review.user_name}</span> —{" "}
-              {review.text}
-            </p>
-          </div>
-        ))}
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="h-full bg-transparent border border-neutral-800 rounded-2xl shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset] flex items-center justify-center">
+        <div className="text-center text-neutral-400">Loading reviews...</div>
       </div>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <div className="h-full bg-transparent border border-neutral-800 rounded-2xl shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset] flex items-center justify-center">
+        <div className="text-center text-neutral-400">
+          <p className="text-sm">No reviews yet</p>
+          <p className="text-xs mt-1">Be the first to leave a review!</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <BentoCard>
+      <Carousel className="w-full h-full">
+        <CarouselContent className="h-full">
+          {reviews.map((review, index) => (
+            <CarouselItem
+              key={review.id || index}
+              className="h-full">
+              <Card className="bg-transparent border-none h-full">
+                <CardContent className="p-4 h-full flex flex-col justify-center">
+                  <div className="flex items-center mb-2">
+                    <div className="flex text-yellow">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className="text-sm">
+                          {i < review.rating ? "★" : "☆"}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="ml-2 text-xs text-neutral-400">
+                      {review.rating}/5
+                    </span>
+                  </div>
+                  <p className="text-sm text-white mb-3 line-clamp-3">
+                    {review.text}
+                  </p>
+                  <div className="text-xs text-neutral-400">
+                    <span className="font-medium">{review.user_name}</span>
+                    {review.created_at && (
+                      <>
+                        {" • "}
+                        <span>
+                          {new Date(review.created_at).toLocaleDateString()}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-neutral-800/80 border-neutral-700 hover:bg-neutral-700/80" />
+        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-neutral-800/80 border-neutral-700 hover:bg-neutral-700/80" />
+      </Carousel>
     </BentoCard>
   );
 }
@@ -239,7 +277,7 @@ function BookingSummary({
   selectedSlots,
   currTurf,
   totalAmount,
-  isMobile = false
+  isMobile = false,
 }: BookingSummaryProps) {
   if (selectedSlots.length === 0) return null;
 
@@ -300,7 +338,7 @@ function BookingSummary({
               <div className="font-redhatmono text-neutral-400">
                 {slot.slot.start} - {slot.slot.end}
               </div>
-              <div className="font-redhatmono text-neutral-400 text-yellow">
+              <div className="font-redhatmono text-yellow">
                 Price: &#2547;{slot.price}
               </div>
             </div>
@@ -345,81 +383,91 @@ export default function TurfBooking() {
   const { user } = useUser();
   const location = useLocation();
   const currTurf: TurfEntity = location.state;
-  const [bookingSet, setBookingSet] = useState<Set<string>>(new Set()); 
+  const [bookingSet, setBookingSet] = useState<Set<string>>(new Set());
 
   const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
-  const [totalAmount,setTotalAmount] = useState<number>(0);
+  const [totalAmount, setTotalAmount] = useState<number>(0);
 
   // Ref to NavBar to toggle profile
   const navRef = useRef<NavBarRef>(null);
- 
-  //fetch actual bookings
-  useEffect(()=>{
-    const fetchBookings = async () => {
-      try{const response = await api.get(`/booking/${currTurf.id}`);
- 
-          const booked = new Set<string>();
-          response.data.forEach((booking:Booking) => {
-            booked.add(JSON.stringify({date: booking.date, start: booking.startTime , end: booking.endTime}));
-          });
-          setBookingSet(booked);
-          console.log(currTurf.prices)
-      }catch(error){
-        console.error("Error fetching bookings:", error);
-     }
-    }
-    fetchBookings();
-  },[]);
 
-  
+  //fetch actual bookings
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const response = await api.get(`/booking/${currTurf.id}`);
+
+        const booked = new Set<string>();
+        response.data.forEach((booking: Booking) => {
+          booked.add(
+            JSON.stringify({
+              date: booking.date,
+              start: booking.startTime,
+              end: booking.endTime,
+            })
+          );
+        });
+        setBookingSet(booked);
+        console.log(currTurf.prices);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      }
+    };
+    fetchBookings();
+  }, []);
 
   //navigate to maps
-  const handleNavigateClick = (lat:number,lng:number) => {
+  const handleNavigateClick = (lat: number, lng: number) => {
     const url = `https://www.google.com/maps?q=${lat},${lng}`;
     window.open(url, "_blank"); // opens in a new tab
   };
 
   //24 hour converter
-  const ampmTo24 = (timeStr:string)=> {
-      let [time, modifier] = timeStr.split(" ");
-      let [hours, minutes] = time.split(":").map(Number);
+  const ampmTo24 = (timeStr: string) => {
+    let [time, modifier] = timeStr.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
 
-      if (modifier === "PM" && hours !== 12) hours += 12;
-      if (modifier === "AM" && hours === 12) hours = 0;
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
 
-      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`;
-  }
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:00`;
+  };
 
-  const timeToMinutes = (timeStr:string) => {
+  const timeToMinutes = (timeStr: string) => {
     const [h, m, s] = timeStr.split(":").map(Number);
-    return h*60+ m;
- }
+    return h * 60 + m;
+  };
 
   const inTimeRange = (slot: TimeSlot, startTime: string, endTime: string) => {
-      let slotStart = timeToMinutes(ampmTo24(slot.start));
-      let slotEnd = timeToMinutes(ampmTo24(slot.end));
-      let start = timeToMinutes(startTime);
-      let end = timeToMinutes(endTime);
+    let slotStart = timeToMinutes(ampmTo24(slot.start));
+    let slotEnd = timeToMinutes(ampmTo24(slot.end));
+    let start = timeToMinutes(startTime);
+    let end = timeToMinutes(endTime);
 
-      // handle slots that span midnight
-      if (slotEnd <= slotStart) slotEnd += 24 * 60; 
-      if (end <= start) end += 24 * 60;
+    // handle slots that span midnight
+    if (slotEnd <= slotStart) slotEnd += 24 * 60;
+    if (end <= start) end += 24 * 60;
 
-      return slotStart >= start && slotEnd <= end;
-};
-
+    return slotStart >= start && slotEnd <= end;
+  };
 
   //slot price calculation
-   const slotPrice = (day:string,slot:TimeSlot)=>{
-      for(const price of currTurf.prices){
-        if(price.startDay <= weekDayMap[day] && weekDayMap[day] <= price.endDay){
-          if(inTimeRange(slot,price.startHour,price.endHour)) return price.pricePerHour;
-        }
+  const slotPrice = (day: string, slot: TimeSlot) => {
+    for (const price of currTurf.prices) {
+      if (
+        price.startDay <= weekDayMap[day] &&
+        weekDayMap[day] <= price.endDay
+      ) {
+        if (inTimeRange(slot, price.startHour, price.endHour))
+          return price.pricePerHour;
       }
+    }
 
-      return 0;
-   }
+    return 0;
+  };
 
   // Week dates
   const getWeekDates = (weekOffset: number = 0): WeekDate[] => {
@@ -443,64 +491,67 @@ export default function TurfBooking() {
 
   // 90-minute slots, 6:00 → 22:30 end
   const generateTimeSlots = (): TimeSlot[] => {
-  const slots: TimeSlot[] = [];
+    const slots: TimeSlot[] = [];
 
-  for (let hour = 6.5; hour < 24; hour += 1.5) { 
-    const startHour = Math.floor(hour) % 24;
-    const startMinute = (hour % 1) * 60;
+    for (let hour = 6.5; hour < 24; hour += 1.5) {
+      const startHour = Math.floor(hour) % 24;
+      const startMinute = (hour % 1) * 60;
 
-    const endHour = Math.floor(hour + 1.5) % 24;
-    const endMinute = ((hour + 1.5) % 1) * 60;
+      const endHour = Math.floor(hour + 1.5) % 24;
+      const endMinute = ((hour + 1.5) % 1) * 60;
 
-    const fmt = (h: number, m: number) => {
-      const period = h >= 12 ? "PM" : "AM";
-      const displayHour = h % 12 === 0 ? 12 : h % 12;
-      return `${displayHour.toString().padStart(2, "0")}:${m
-        .toString()
-        .padStart(2, "0")} ${period}`;
-    };
+      const fmt = (h: number, m: number) => {
+        const period = h >= 12 ? "PM" : "AM";
+        const displayHour = h % 12 === 0 ? 12 : h % 12;
+        return `${displayHour.toString().padStart(2, "0")}:${m
+          .toString()
+          .padStart(2, "0")} ${period}`;
+      };
 
-    slots.push({
-      id: `${startHour}-${startMinute}`,
-      start: fmt(startHour, startMinute),
-      end: fmt(endHour, endMinute),
-      time24: `${startHour.toString().padStart(2, "0")}:${startMinute
-        .toString()
-        .padStart(2, "0")}`,
-    });
-  }
+      slots.push({
+        id: `${startHour}-${startMinute}`,
+        start: fmt(startHour, startMinute),
+        end: fmt(endHour, endMinute),
+        time24: `${startHour.toString().padStart(2, "0")}:${startMinute
+          .toString()
+          .padStart(2, "0")}`,
+      });
+    }
 
-  return slots;
-};
-
+    return slots;
+  };
 
   const weekDates = getWeekDates(currentWeekOffset);
   const timeSlots = generateTimeSlots();
 
   //availability
   const getSlotAvailability = (
-    date: string, slot:TimeSlot
+    date: string,
+    slot: TimeSlot
   ): SlotAvailability => {
-        if (
-        bookingSet.has(
-          JSON.stringify({
-            date,
-            start: ampmTo24(slot.start),
-            end: ampmTo24(slot.end),
-          })
-        )
-       ) 
-        return "booked"; 
+    if (
+      bookingSet.has(
+        JSON.stringify({
+          date,
+          start: ampmTo24(slot.start),
+          end: ampmTo24(slot.end),
+        })
+      )
+    )
+      return "booked";
 
     return "available";
   };
 
-  
-
   const isSlotSelected = (date: string, slotId: string) =>
     selectedSlots.some((s) => s.date === date && s.slotId === slotId);
 
-  const toggleSlot = (date: string, slotId: string, slot: TimeSlot,price:number) => {
+  const toggleSlot = (
+    date: string,
+    slotId: string,
+    slot: TimeSlot,
+    price: number
+  ) => {
     const already = isSlotSelected(date, slotId);
     if (already) {
       setTotalAmount(totalAmount - price);
@@ -509,7 +560,7 @@ export default function TurfBooking() {
       );
     } else if (getSlotAvailability(date, slot) === "available") {
       setTotalAmount(totalAmount + price);
-      setSelectedSlots((prev) => [...prev, { date, slotId, slot,price }]);
+      setSelectedSlots((prev) => [...prev, { date, slotId, slot, price }]);
     }
   };
 
@@ -528,10 +579,16 @@ export default function TurfBooking() {
 
   return (
     <div className="min-h-screen bg-black text-neutral-100">
-      <NavBar ref={navRef}/>
+      <NavBar ref={navRef} />
 
       {/* Render the floating red-dot button only when logged out */}
-      {!user && <LoginNudge triggerNavBarAction={()=>{navRef.current?.toggleProfile()}} />}
+      {!user && (
+        <LoginNudge
+          triggerNavBarAction={() => {
+            navRef.current?.toggleProfile();
+          }}
+        />
+      )}
 
       {/* Header (replace your snippet with this so it also opens the pop-up) */}
       <div className="relative md:h-17.5 rounded-b-2xl z-10 border-b border-neutral-800 bg-neutral-900/80">
@@ -550,8 +607,7 @@ export default function TurfBooking() {
                   }
                   className="relative inline-flex items-center gap-2 bg-red-700/20 text-red-300 border border-red-700/40 px-3 py-2 rounded-xl hover:bg-red-700/30">
                   <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-neutral-900" />
-                  <span className="h-2 w-2 rounded-full bg-red-500" />
-                  Please login to continue
+                  Please login to book
                 </button>
               )}
             </p>
@@ -578,12 +634,22 @@ export default function TurfBooking() {
             <BentoCard className="p-5 sm:p-6">
               <div className="flex items-center mb-3">
                 <MousePointer2 className="w-5 h-5 mr-2 text-white/90" />
-                <h3 className="font-polysans text-xl font-semibold text-white cursor-pointer" onClick={() => handleNavigateClick(currTurf.location.latitude,currTurf.location.longitude)}>
+                <h3
+                  className="font-polysans text-xl font-semibold text-white cursor-pointer"
+                  onClick={() =>
+                    handleNavigateClick(
+                      currTurf.location.latitude,
+                      currTurf.location.longitude
+                    )
+                  }>
                   Navigate
                 </h3>
               </div>
               <div>
-                <MapComponent lat={currTurf.location.latitude} lng={currTurf.location.longitude}/>
+                <MapComponent
+                  lat={currTurf.location.latitude}
+                  lng={currTurf.location.longitude}
+                />
               </div>
 
               <div className="mt-1 flex items-center text-neutral-300 font-redhatmono">
@@ -603,7 +669,7 @@ export default function TurfBooking() {
               <div className="grid grid-cols-3 gap-3 mt-4">
                 <div className="rounded-xl bg-neutral-800/80 border border-neutral-700 p-3 text-center">
                   <p className="font-polysans text-xl font-bold text-white">
-                    {84-bookingSet.size}
+                    {84 - bookingSet.size}
                   </p>
                   <p className="text-xs font-redhatmono text-neutral-400">
                     Slots
@@ -709,10 +775,10 @@ export default function TurfBooking() {
                           key={`${day.fullDate}-${slot.id}`}
                           className="flex-1 px-1">
                           <button
-                            onClick={() =>{
-                                 let price = slotPrice(day.day,slot);
-                                 toggleSlot(day.fullDate, slot.id, slot,price);}
-                            }
+                            onClick={() => {
+                              let price = slotPrice(day.day, slot);
+                              toggleSlot(day.fullDate, slot.id, slot, price);
+                            }}
                             className={[
                               "w-full p-1 sm:p-3 text-xs sm:text-sm font-redhatmono font-medium",
                               "border-2 rounded-lg sm:rounded-xl transition-all",
@@ -781,5 +847,3 @@ export default function TurfBooking() {
     </div>
   );
 }
-
-
