@@ -32,7 +32,7 @@ export default function Login({
   return (
     <>
       <div
-        className={`fixed top-0 right-0 h-1/2 
+        className={`fixed top-0 right-0 h-3/3.5 
           w-11/12 max-w-md sm:w-96 bg-yellow/90
            rounded-l-2xl z-50 transition-all backdrop-blur-md
            duration-300 ease-in-out ${
@@ -42,7 +42,7 @@ export default function Login({
            }`}>
         <div className="flex flex-col h-full">
           {/* header */}
-          <div className="flex justify-end items-center p-6">
+          <div className="flex justify-end items-center p-3">
             <button
               onClick={toggleProfile}
               className="text-almostblack font-redhatmono text-sm cursor-pointer">
@@ -52,10 +52,12 @@ export default function Login({
 
           {/* If user is logged in, show logout screen */}
           {user ? (
-            <div className="flex-1 overflow-y-auto p-6 font-redhatmono">
+            <div className="flex-1 p-6 font-redhatmono">
               <div className="space-y-6">
                 <div className="text-center mb-6">
-                  <h2 className="text-xl font-medium">Welcome, {user.name}</h2>
+                  <h2 className="text-xl text-almostblack font-medium">
+                    Welcome, {user.name}
+                  </h2>
                   <p className="text-gray-600 mt-2">{user.email}</p>
                 </div>
 
@@ -111,11 +113,11 @@ export default function Login({
                 <div className="flex justify-center">
                   <button
                     onClick={() => {
-                      handleLogin(email, password)
-                      setEmail("")
-                      setPassword("")
+                      handleLogin(email, password);
+                      setEmail("");
+                      setPassword("");
                     }}
-                    className="w-min rounded-2xl py-3 px-4 hover:bg-blue-600 text-black hover:text-white transition-colors font-medium cursor-pointer duration-300">
+                    className="w-min rounded-2xl py-3 px-4 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-medium cursor-pointer duration-300">
                     Login
                   </button>
                 </div>
