@@ -55,8 +55,7 @@ export default function Games() {
         <div className="grid grid-cols-1 md:grid-cols-2 items-center mb-6 gap-3">
           <h1
             ref={titleRef}
-            className={`font-polysans font-bold text-white tracking-tight transition-all duration-300 origin-left ${
-              isSearchExpanded ? "text-base" : "text-3xl"
+            className={`font-polysans font-bold text-white tracking-tight transition-all duration-300 origin-left text-3xl
             }`}>
             FIND GAMES!
           </h1>

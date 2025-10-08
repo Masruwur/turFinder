@@ -49,7 +49,7 @@ interface WeekDate {
   month: string;
   fullDate: string;
 }
-interface TimeSlot {
+export interface TimeSlot {
   id: string;
   start: string;
   end: string;
@@ -267,7 +267,7 @@ function ReviewsCard({ id }: { id: number | string }) {
   );
 }
 
-interface BookingSummaryProps {
+export interface BookingSummaryProps {
   selectedSlots: SelectedSlot[];
   currTurf: TurfEntity;
   totalAmount: number;

@@ -10,13 +10,13 @@ import FilterIcon from "../assets/icons/filter.svg";
 import ArrowDownIcon from "../assets/icons/arrow-down.svg";
 import NavBar from "../components/NavBar";
 import { mockTurfs, TurfData, TurfEntity } from "../data/mockData";
-import getDistanceFromLatLon  from "../util/location";
+import getDistanceFromLatLon from "../util/location";
 import api from "../util/api";
 import { getMinPrice } from "../util/price";
 
 // ===== TYPE DEFINITIONS =====
 // Use TurfData from mockData for consistency
-interface TurfCard extends TurfData {}
+export interface TurfCard extends TurfData {}
 
 // ===== MAIN COMPONENT - FUNCTION COMPONENT =====
 export default function TurFindPage() {
@@ -45,38 +45,45 @@ export default function TurFindPage() {
 
   //turf map varibles and calls
   const navigate = useNavigate();
-  const  [userLocation,setUserLocation] = useState<{lat:number,lon:number}|null>(null);
-  const [TurfData,setTurfData] = useState<TurfEntity[]>([]);
-  const [loading,setLoading] = useState<boolean>(true);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
+  const [TurfData, setTurfData] = useState<TurfEntity[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(()=>{
-     const fetchTurfs = async () =>{
-      try{
+  useEffect(() => {
+    const fetchTurfs = async () => {
+      try {
         setLoading(true);
         const response = await api.get("/turfs");
-        const turfs : TurfEntity[] = response.data;
+        const turfs: TurfEntity[] = response.data;
         setTurfData(turfs);
         setLoading(false);
-      }catch(err){
-        console.error("Failed to fetch turfs",err);
+      } catch (err) {
+        console.error("Failed to fetch turfs", err);
       }
-     }
-     fetchTurfs();
-  },[]);
+    };
+    fetchTurfs();
+  }, []);
 
-  useEffect(()=>{
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition((position)=>{ 
-        setUserLocation({lat:position.coords.latitude,lon:position.coords.longitude});  
-      }
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
 
-      ,(error)=>{
-        console.error("Error getting location",error);
-        setUserLocation(null);
-      });
+        (error) => {
+          console.error("Error getting location", error);
+          setUserLocation(null);
+        }
+      );
     }
-  },[]);
-
+  }, []);
 
   // ===== GSAP ANIMATIONS =====
   // Main animation effect that runs on component mount and dropdown state changes
@@ -337,7 +344,15 @@ export default function TurFindPage() {
                     </div>
                   </div>
                   <p className="text-xs text-neutral-300 font-redhatmono">
-                    {turf.location.address} • {userLocation ? `${getDistanceFromLatLon(userLocation.lat,userLocation.lon,turf.location.latitude,turf.location.longitude).toFixed(1)} km` : "Location Unavailable"}
+                    {turf.location.address} •{" "}
+                    {userLocation
+                      ? `${getDistanceFromLatLon(
+                          userLocation.lat,
+                          userLocation.lon,
+                          turf.location.latitude,
+                          turf.location.longitude
+                        ).toFixed(1)} km`
+                      : "Location Unavailable"}
                   </p>
                 </div>
 
@@ -352,7 +367,7 @@ export default function TurFindPage() {
 
                   {/* Book now button */}
                   <button
-                    onClick={() => navigate(`/slot`,{state:turf})}
+                    onClick={() => navigate(`/slot`, { state: turf })}
                     className="px-4 py-2 font-medium rounded-lg transition-colors duration-300
                                bg-green font-redhatmono text-almostwhite cursor-pointer
                                hover:bg-darkgreen active:bg-darkgreen/80 text-sm">

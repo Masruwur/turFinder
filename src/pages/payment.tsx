@@ -1,4 +1,8 @@
 import { Wallet } from "lucide-react";
+import { useState, useEffect } from "react";
+import { TurfCard } from "./turFind";
+import { mockTurfs, TurfData, TurfEntity } from "../data/mockData";
+import api from "@/util/api";
 
 export default function Payment() {
   return (
@@ -112,6 +116,24 @@ function Field({
 }
 
 function Ticket() {
+  const [TurfData, setTurfData] = useState<TurfEntity[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchTurfs = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/turfs");
+        const turfs: TurfEntity[] = response.data;
+        setTurfData(turfs);
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch turfs", err);
+      }
+    };
+    fetchTurfs();
+  }, []);
+
   return (
     <div className="bg-yellow-400 text-gray-900 rounded-md shadow-[0_10px_30px_-10px_rgba(250,204,21,0.4)] border border-black/20 overflow-hidden">
       {/* Ticket Header Row */}
@@ -130,8 +152,8 @@ function Ticket() {
       {/* Grey strip */}
       <div className="bg-gray-100 text-gray-900 px-5 py-4 border-b border-black/20">
         <div className="flex items-center justify-between font-mono tracking-wide">
-          <span>03-11-24 * 11:00 AM *</span>
-          <span>NORTH ARENA</span>
+          <span>{TurfData[0]?.slotDuration} minutes</span>
+          <span>{TurfData[0]?.name}</span>
         </div>
         <div className="font-mono text-2xl mt-1 tracking-wide">SUNDAY</div>
       </div>
