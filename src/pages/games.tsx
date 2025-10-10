@@ -36,6 +36,7 @@ export default function Games() {
 
   return (
     <div className="min-h-screen bg-green-800 text-neutral-100">
+      <NavBar />
       {/* backdrop grid */}
       <div
         style={{
@@ -45,12 +46,12 @@ export default function Games() {
           backgroundImage:
             "repeating-linear-gradient(to right, #262626 0px, #262626 1px, transparent 1px, transparent 100px), repeating-linear-gradient(to bottom, #262626 0px, #262626 1px, transparent 1px, transparent 100px)",
           backgroundSize: "60px 60px",
+          pointerEvents: "none",
         }}
       />
-      <NavBar />
 
       {/* Tighter container */}
-      <div className="relative z-10 mx-auto max-w-screen-2xl px-4 lg:px-6 py-6">
+      <div className="relative z-10 mx-auto max-w-[1800px] px-4 lg:px-6 xl:px-8 2xl:px-10 py-6">
         {/* Title + Search */}
         <div className="grid grid-cols-1 md:grid-cols-2 items-center mb-6 gap-3">
           <h1
@@ -72,10 +73,10 @@ export default function Games() {
           </div>
         </div>
 
-        {/* ===== 4-column layout on large screens: 1 info + 3 cards ===== */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* LEFT COLUMN (fixed 1 col) */}
-          <aside className="col-span-1 space-y-6 lg:sticky lg:top-6 self-start min-w-0">
+        {/* ===== Responsive layout with contextual sidebar ===== */}
+        <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[360px_minmax(0,1fr)]">
+          {/* LEFT COLUMN */}
+          <aside className="order-1 lg:order-1 space-y-6 min-w-0 pointer-events-auto xl:sticky xl:top-6">
             <ProfileCard />
             <InboxCard
               items={[
@@ -126,8 +127,8 @@ export default function Games() {
             />
           </aside>
 
-          {/* RIGHT SIDE: 3 columns of cards */}
-          <main className="lg:col-span-3 min-w-0">
+          {/* RIGHT SIDE: card gallery */}
+          <main className="order-2 lg:order-2 min-w-0">
             <GalleryGrid turfs={filteredTurfs} />
           </main>
         </div>
@@ -346,8 +347,10 @@ function GalleryGrid({ turfs }: { turfs: SlotCardData[] }) {
         </div>
       </div>
 
-      {/* 3 columns on lg+ always for field cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Auto-fit card grid with minimum card width to maintain readability */}
+      <div
+        className="grid gap-6"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
         {turfs.map((t) => (
           <UpgradedCard
             key={t.id}
@@ -399,15 +402,15 @@ function UpgradedCard({ turf }: { turf: SlotCardData }) {
             {turf.name}
           </h4>
 
-          <div className="flex items-center justify-between gap-3">
-            <div className="font-polysans text-xl font-bold text-white shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="font-polysans text-xl font-bold text-white">
               &#2547;{turf.price}
               <span className="font-redhatmono text-sm font-normal text-yellow">
                 /hour
               </span>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2">
               <div className="w-24 h-2 bg-neutral-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${barColor}`}

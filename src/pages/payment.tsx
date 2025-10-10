@@ -3,12 +3,15 @@ import { useState, useEffect } from "react";
 import { TurfCard } from "./turFind";
 import { mockTurfs, TurfData, TurfEntity } from "../data/mockData";
 import api from "@/util/api";
+import { useNavigate } from "react-router-dom";
 
 export default function Payment() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans dark:bg-gray-950 dark:text-gray-50">
       <header className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
         <button
+          onClick={() => navigate(-1)}
           className="font-mono text-2xl tracking-wide"
           aria-label="Back">
           ‹
@@ -83,7 +86,7 @@ export default function Payment() {
 
             <Field label="CARDHOLDER NAME">
               <input
-                placeholder="HAKLA"
+                placeholder="JOHN"
                 className="w-full h-12 px-4 bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-200 font-mono tracking-wide uppercase"
               />
             </Field>
