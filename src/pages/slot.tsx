@@ -13,7 +13,7 @@ import {
 import NavBar, { NavBarRef } from "../components/NavBar";
 import TurfCarousel from "../components/TurfCarousel";
 import { TurfEntity } from "../data/mockData";
-import { redirect, useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../util/user";
 import api from "../util/api";
 import MapComponent from "../util/map";
@@ -55,7 +55,7 @@ export interface TimeSlot {
   end: string;
   time24: string;
 }
-interface SelectedSlot {
+export interface SelectedSlot {
   date: string;
   slotId: string;
   slot: TimeSlot;
@@ -272,12 +272,14 @@ export interface BookingSummaryProps {
   currTurf: TurfEntity;
   totalAmount: number;
   isMobile?: boolean;
+  onCheckout: () => void;
 }
 function BookingSummary({
   selectedSlots,
   currTurf,
   totalAmount,
   isMobile = false,
+  onCheckout,
 }: BookingSummaryProps) {
   if (selectedSlots.length === 0) return null;
 
@@ -370,7 +372,7 @@ function BookingSummary({
       )}
 
       <button
-        onClick={() => (window.location.href = "/payment")}
+        onClick={onCheckout}
         className="w-full bg-green text-white py-3 rounded-xl font-polysans font-semibold hover:bg-darkgreen transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm sm:text-base">
         <CreditCard className="w-5 h-5" />
         <span>Book Now - &#2547;{totalAmount}</span>
@@ -382,7 +384,8 @@ function BookingSummary({
 export default function TurfBooking() {
   const { user } = useUser();
   const location = useLocation();
-  const currTurf: TurfEntity = location.state;
+  const navigate = useNavigate();
+  const currTurf = location.state as TurfEntity | undefined;
   const [bookingSet, setBookingSet] = useState<Set<string>>(new Set());
 
   const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
@@ -392,11 +395,20 @@ export default function TurfBooking() {
   // Ref to NavBar to toggle profile
   const navRef = useRef<NavBarRef>(null);
 
+  useEffect(() => {
+    if (!currTurf) {
+      navigate("/turfind", { replace: true });
+    }
+  }, [currTurf, navigate]);
+
   //fetch actual bookings
   useEffect(() => {
+    const turf = currTurf;
+    if (!turf) return;
+
     const fetchBookings = async () => {
       try {
-        const response = await api.get(`/booking/${currTurf.id}`);
+        const response = await api.get(`/booking/${turf.id}`);
 
         const booked = new Set<string>();
         response.data.forEach((booking: Booking) => {
@@ -409,13 +421,25 @@ export default function TurfBooking() {
           );
         });
         setBookingSet(booked);
-        console.log(currTurf.prices);
+        console.log(turf.prices);
       } catch (error) {
         console.error("Error fetching bookings:", error);
       }
     };
     fetchBookings();
-  }, []);
+  }, [currTurf]);
+
+  const handleCheckout = () => {
+    if (!currTurf || selectedSlots.length === 0) return;
+
+    navigate("/payment", {
+      state: {
+        turf: currTurf,
+        selectedSlots,
+        totalAmount,
+      },
+    });
+  };
 
   //navigate to maps
   const handleNavigateClick = (lat: number, lng: number) => {
@@ -456,6 +480,8 @@ export default function TurfBooking() {
 
   //slot price calculation
   const slotPrice = (day: string, slot: TimeSlot) => {
+    if (!currTurf) return 0;
+
     for (const price of currTurf.prices) {
       if (
         price.startDay <= weekDayMap[day] &&
@@ -520,6 +546,10 @@ export default function TurfBooking() {
 
     return slots;
   };
+
+  if (!currTurf) {
+    return null;
+  }
 
   const weekDates = getWeekDates(currentWeekOffset);
   const timeSlots = generateTimeSlots();
@@ -817,6 +847,7 @@ export default function TurfBooking() {
                     selectedSlots={selectedSlots}
                     currTurf={currTurf}
                     totalAmount={totalAmount}
+                    onCheckout={handleCheckout}
                   />
                 </BentoCard>
               </div>
@@ -832,6 +863,7 @@ export default function TurfBooking() {
                     currTurf={currTurf}
                     totalAmount={totalAmount}
                     isMobile
+                    onCheckout={handleCheckout}
                   />
                 </BentoCard>
               </div>

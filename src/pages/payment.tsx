@@ -1,12 +1,35 @@
 import { Wallet } from "lucide-react";
-import { useState, useEffect } from "react";
-import { TurfCard } from "./turFind";
-import { mockTurfs, TurfData, TurfEntity } from "../data/mockData";
-import api from "@/util/api";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { TurfEntity } from "../data/mockData";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { SelectedSlot } from "./slot";
+
+interface PaymentLocationState {
+  turf: TurfEntity;
+  selectedSlots: SelectedSlot[];
+  totalAmount: number;
+}
 
 export default function Payment() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as PaymentLocationState | undefined;
+
+  useEffect(() => {
+    if (!state) {
+      navigate("/turfind", { replace: true });
+    }
+  }, [state, navigate]);
+
+  if (!state) {
+    return null;
+  }
+
+  const { turf, selectedSlots, totalAmount } = state;
+  const formattedTotal = totalAmount.toLocaleString("en-US", {
+    maximumFractionDigits: 0,
+  });
+
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans dark:bg-gray-950 dark:text-gray-50">
       <header className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
@@ -96,7 +119,11 @@ export default function Payment() {
         {/* RIGHT: Order summary (yellow ticket style) */}
         <aside className="lg:col-span-5 xl:col-span-4">
           <h2 className="sr-only">Order Summary</h2>
-          <Ticket />
+          <Ticket
+            turf={turf}
+            selectedSlots={selectedSlots}
+            totalAmount={totalAmount}
+          />
         </aside>
       </main>
     </div>
@@ -118,24 +145,26 @@ function Field({
   );
 }
 
-function Ticket() {
-  const [TurfData, setTurfData] = useState<TurfEntity[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+interface TicketProps {
+  turf: TurfEntity;
+  selectedSlots: SelectedSlot[];
+  totalAmount: number;
+}
 
-  useEffect(() => {
-    const fetchTurfs = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/turfs");
-        const turfs: TurfEntity[] = response.data;
-        setTurfData(turfs);
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch turfs", err);
-      }
-    };
-    fetchTurfs();
-  }, []);
+function Ticket({ turf, selectedSlots, totalAmount }: TicketProps) {
+  const formatDate = (isoDate: string) =>
+    new Date(isoDate).toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+
+  const formatCurrency = (value: number) =>
+    value.toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+  const ticketDate = selectedSlots[0]?.date
+    ? formatDate(selectedSlots[0].date)
+    : "—";
 
   return (
     <div className="bg-yellow-400 text-gray-900 rounded-md shadow-[0_10px_30px_-10px_rgba(250,204,21,0.4)] border border-black/20 overflow-hidden">
@@ -155,30 +184,33 @@ function Ticket() {
       {/* Grey strip */}
       <div className="bg-gray-100 text-gray-900 px-5 py-4 border-b border-black/20">
         <div className="flex items-center justify-between font-mono tracking-wide">
-          <span>{TurfData[0]?.slotDuration} minutes</span>
-          <span>{TurfData[0]?.name}</span>
+          <span>{turf.slotDuration} minutes</span>
+          <span>{turf.name}</span>
         </div>
-        <div className="font-mono text-2xl mt-1 tracking-wide">SUNDAY</div>
+        <div className="font-mono text-2xl mt-1 tracking-wide">
+          {ticketDate}
+        </div>
       </div>
 
       {/* Checklist items */}
       <div className="px-5 py-4 space-y-4 font-redhatmono">
-        {[
-          { text: "11:00 - 12:30", completed: false },
-          { text: "advance", completed: true },
-          { text: "referee", completed: false },
-        ].map((item, i) => (
+        {selectedSlots.map((slot) => (
           <div
-            key={i}
+            key={`${slot.date}-${slot.slotId}`}
             className="flex items-start gap-5">
-            <div
-              className={`w-4 h-4 border-2 border-black/80 rounded-sm mt-1 flex items-center justify-center ${
-                item.completed ? "bg-black" : ""
-              }`}>
-              {item.completed && <span className="text-white text-xs">✓</span>}
+            <div className="w-4 h-4 border-2 border-black/80 rounded-sm mt-1 bg-black text-white text-xs grid place-items-center">
+              ✓
             </div>
-            <div className={`text-lg ${item.completed ? "" : ""}`}>
-              {item.text}
+            <div className="flex-1">
+              <div className="text-lg tracking-wide">
+                {slot.slot.start} – {slot.slot.end}
+              </div>
+              <div className="text-sm text-gray-700 tracking-wide">
+                {formatDate(slot.date)}
+              </div>
+            </div>
+            <div className="font-mono text-sm tracking-wide">
+              &#2547;{formatCurrency(slot.price)}
             </div>
           </div>
         ))}
@@ -188,8 +220,8 @@ function Ticket() {
       <div className="px-5 pb-4">
         <div className="h-px bg-black/30 my-2" />
         <div className="flex items-center justify-between font-mono text-sm text-gray-700 tracking-wide">
-          <span>02031124 * 0039 / 100 *</span>
-          <span>02031124</span>
+          <span>{selectedSlots.length} slot(s)</span>
+          <span>&#2547;{formatCurrency(totalAmount)}</span>
         </div>
       </div>
 
@@ -197,29 +229,25 @@ function Ticket() {
       <div className="px-5 py-4 grid grid-cols-3 gap-3 items-end border-t border-black/20">
         <div>
           <div className="font-mono text-xs tracking-wide">RECEIPT</div>
-          <div className="font-mono text-xs tracking-wide">PASS / 0182</div>
+          <div className="font-mono text-xs tracking-wide">
+            TURF #{turf.id.toString().padStart(3, "0")}
+          </div>
         </div>
         <div>
           <div className="font-mono text-xs tracking-wide">TIME & DATE</div>
-          <div className="font-mono text-xs tracking-wide">11-12.30</div>
-          <div className="font-mono text-xs tracking-wide">03.11.24</div>
+          <div className="font-mono text-xs tracking-wide">
+            {selectedSlots[0]?.slot.start} – {selectedSlots[0]?.slot.end}
+          </div>
+          <div className="font-mono text-xs tracking-wide">{ticketDate}</div>
         </div>
         <div className="ml-auto w-40 h-10 bg-[repeating-linear-gradient(90deg,black,black_4px,transparent_4px,transparent_8px)]" />
       </div>
 
       {/* Totals sidebar mimic */}
       <div className="px-5 py-5 bg-black/5 border-t border-black/20">
-        <div className="flex items-center justify-between font-mono tracking-wide">
-          <span>ADVANCE</span>
-          <span>&#2547;500</span>
-        </div>
-        <div className="flex items-center justify-between font-mono mt-2 tracking-wide">
-          <span>REMAINING</span>
-          <span>&#2547;1500</span>
-        </div>
         <div className="flex items-center justify-between font-mono mt-4 text-lg tracking-wide">
           <span>TOTAL</span>
-          <span>&#2547;2000</span>
+          <span>&#2547;{formatCurrency(totalAmount)}</span>
         </div>
       </div>
     </div>
