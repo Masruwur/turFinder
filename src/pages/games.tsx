@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BadgeCheck,
   Bell,
@@ -22,6 +22,11 @@ export default function Games() {
   const searchRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
+  // Game toggle state
+  const [mode, setMode] = useState<GameMode>("join");
+  const [overlayVisible, setOverlayVisible] = useState(true);
+  const [miniVisible, setMiniVisible] = useState(false);
+
   const turfsWithSlots = mockTurfs as SlotCardData[];
 
   const filteredTurfs = useMemo(
@@ -34,9 +39,29 @@ export default function Games() {
     [turfsWithSlots, searchTerm]
   );
 
+  useEffect(() => {
+    if (!overlayVisible) {
+      const timer = window.setTimeout(() => setMiniVisible(true), 260);
+      return () => window.clearTimeout(timer);
+    }
+    setMiniVisible(false);
+  }, [overlayVisible]);
+
+  const handleSelect = (value: GameMode) => {
+    setMode(value);
+    if (overlayVisible) {
+      setOverlayVisible(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-green-800 text-neutral-100">
       <NavBar />
+      <GamesToggle
+        mode={mode}
+        overlayVisible={overlayVisible}
+        handleSelect={handleSelect}
+      />
       {/* backdrop grid */}
       <div
         style={{
@@ -77,7 +102,43 @@ export default function Games() {
         <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[360px_minmax(0,1fr)]">
           {/* LEFT COLUMN */}
           <aside className="order-1 lg:order-1 space-y-6 min-w-0 pointer-events-auto xl:sticky xl:top-6">
-            <ProfileCard />
+            {/* Compact toggle that appears above profile card */}
+            <div
+              className={`transition-all duration-300 ${
+                miniVisible
+                  ? "opacity-100 translate-y-0 mb-4"
+                  : "opacity-0 -translate-y-4 h-0 overflow-hidden mb-0"
+              }`}>
+              <div className="rounded-3xl border border-neutral-600/80 bg-neutral-900/98 px-5 py-4 shadow-[0_25px_50px_rgba(0,0,0,0.6)] backdrop-blur-md ring-1 ring-white/10">
+                <div className="mb-3 flex items-center justify-between text-[11px] font-redhatmono uppercase tracking-[0.24em] text-neutral-300">
+                  <span>Game mode</span>
+                  <span className="text-neutral-400 normal-case tracking-normal">
+                    {mode === "join" ? "Looking to play" : "Hosting"}
+                  </span>
+                </div>
+                <div className="flex gap-1 rounded-2xl bg-neutral-800/90 p-1 border border-neutral-700/50">
+                  {gameModes.map((option) => {
+                    const isActive = option.value === mode;
+                    return (
+                      <button
+                        key={option.value}
+                        onClick={() => handleSelect(option.value)}
+                        className={`flex-1 rounded-2xl px-4 py-2.5 text-sm font-redhatmono transition-all duration-200 ${
+                          isActive
+                            ? "bg-white text-neutral-900 shadow-[0_8px_20px_rgba(0,0,0,0.4)] ring-1 ring-white/20"
+                            : "text-neutral-300 hover:text-white hover:bg-neutral-700/50"
+                        }`}>
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <ProfileCard />
+            </div>
             <InboxCard
               items={[
                 {
@@ -217,10 +278,136 @@ function HeaderSearch({
   );
 }
 
+type GameMode = "join" | "host";
+
+const gameModes: Array<{
+  value: GameMode;
+  label: string;
+  badge: string;
+  description: string;
+}> = [
+  {
+    value: "join",
+    label: "Find a game",
+    badge: "Jump in",
+    description: "Observe ongoing bookings and request to join",
+  },
+  {
+    value: "host",
+    label: "Host a match",
+    badge: "invite players",
+    description:
+      "Create your own game, invite friends and leave requests open for eligible players",
+  },
+];
+
+function GamesToggle({
+  mode,
+  overlayVisible,
+  handleSelect,
+}: {
+  mode: GameMode;
+  overlayVisible: boolean;
+  handleSelect: (value: GameMode) => void;
+}) {
+  return (
+    <>
+      {/* Intro modal */}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
+          overlayVisible
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}>
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 w-[min(92vw,420px)] overflow-hidden rounded-[32px] border border-white/35 bg-gradient-to-br from-white via-white to-neutral-100 text-neutral-800 shadow-[0_30px_90px_rgba(13,20,26,0.5)]">
+          <div
+            className="absolute inset-0 pointer-events-none mix-blend-soft-light"
+            style={{
+              background:
+                "radial-gradient(120% 100% at 100% 0%, rgba(20,83,45,0.08) 0%, rgba(255,255,255,0) 60%), radial-gradient(90% 80% at 0% 100%, rgba(37,99,235,0.12) 0%, rgba(255,255,255,0) 65%)",
+            }}
+          />
+          <div className="relative flex flex-col gap-6 p-6">
+            <div className="flex items-center justify-between text-[11px] font-redhatmono uppercase tracking-[0.32em] text-neutral-400">
+              <span className="rounded-full bg-yellow px-3 py-1 text-black">
+                Today
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-redhatmono text-[12px] uppercase tracking-[0.3em] text-neutral-400">
+                Game mode
+              </p>
+              <h2 className="font-polysans text-3xl font-semibold text-neutral-900 leading-tight">
+                How are you playing today?
+              </h2>
+              <p className="text-sm text-neutral-500 leading-relaxed">
+                Decide if you want to jump into an existing slot or invite
+                people to fill-up your own game.
+              </p>
+            </div>
+
+            <div className="grid gap-3">
+              {gameModes.map((option) => {
+                const isActive = option.value === mode;
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => handleSelect(option.value)}
+                    className={`group relative overflow-hidden rounded-3xl border transition-all text-left ${
+                      isActive
+                        ? "border-neutral-900 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.15)]"
+                        : "border-neutral-200 bg-white/70 hover:border-neutral-300 hover:shadow-[0_8px_25px_rgba(15,23,42,0.12)]"
+                    }`}>
+                    <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "radial-gradient(120% 120% at 80% 0%, rgba(34,197,94,0.12) 0%, rgba(255,255,255,0) 65%)",
+                        }}
+                      />
+                    </div>
+                    <div className="relative flex gap-4 p-5">
+                      <div className="flex-1 space-y-2">
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-redhatmono uppercase tracking-[0.24em] ${
+                            isActive
+                              ? "bg-neutral-900 text-neutral-50"
+                              : "bg-neutral-200 text-neutral-600"
+                          }`}>
+                          {option.badge}
+                        </span>
+                        <div>
+                          <div className="font-polysans text-xl font-semibold text-neutral-900">
+                            {option.label}
+                          </div>
+                          <p className="mt-1 text-sm text-neutral-500 leading-relaxed">
+                            {option.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 /* =================== LEFT COLUMN CARDS =================== */
 function ProfileCard() {
   return (
-    <div className="rounded-3xl border border-neutral-800 bg-neutral-900/90 relative p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-900/90 relative p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden z-10">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -245,9 +432,6 @@ function ProfileCard() {
           <p className="text-neutral-400 font-redhatmono text-sm truncate">
             Toxic Pants
           </p>
-          <div className="font-redhatmono text-sm text-yellow pt-0.5">
-            <span className="text-white">4</span> games played
-          </div>
         </div>
       </div>
     </div>
