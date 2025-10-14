@@ -1,4 +1,10 @@
-import { useState, useEffect, useRef,forwardRef,useImperativeHandle } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import "../index.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/turfinderlogo.png";
@@ -23,10 +29,7 @@ export type NavBarRef = {
   toggleProfile: () => void;
 };
 
-
-  const NavBar = forwardRef<NavBarRef>((props,ref) => {
-  
-
+const NavBar = forwardRef<NavBarRef>((props, ref) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,9 +41,9 @@ export type NavBarRef = {
 
   const { setUser } = useUser();
 
-   useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     toggleProfile: () => toggleProfile(),
-   }));
+  }));
 
   const handleCalendarClick = (): void => {
     setIsCalendarOpen(!isCalendarOpen);
@@ -99,52 +102,64 @@ export type NavBarRef = {
     setMode("login");
   };
 
-  const  handleLogin = async (email:string,password:string): Promise<void> => {
-    try{
-      const response = await api.post('/users/login', { email, password });
-      if(response.status === 200){
-        const accessToken  = response.data.token;
-        localStorage.setItem('accessToken', accessToken);
+  const handleLogin = async (
+    email: string,
+    password: string
+  ): Promise<void> => {
+    try {
+      const response = await api.post("/users/login", { email, password });
+      if (response.status === 200) {
+        const accessToken = response.data.token;
+        localStorage.setItem("accessToken", accessToken);
         const user: User = {
           id: response.data.id,
           name: response.data.name,
-          email: response.data.email
+          email: response.data.email,
         };
         setUser(user);
-        localStorage.setItem("user",JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(user));
       }
-    }catch(error){
-      console.error("Login failed:",error);
+    } catch (error) {
+      console.error("Login failed:", error);
     }
   };
 
-  const handleSignup = async (name:string,email:string,password:string,
-                              confirmPassword:string,isChecked:boolean,captchaValue:string|null): Promise<void> => {
-                                
-    if(!captchaValue){
+  const handleSignup = async (
+    name: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+    isChecked: boolean,
+    captchaValue: string | null
+  ): Promise<void> => {
+    if (!captchaValue) {
       alert("Please complete the reCAPTCHA");
       return;
-    }                            
+    }
 
-    if(password !== confirmPassword){
+    if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    if(!isChecked){
+    if (!isChecked) {
       alert("You must agree to the terms and conditions");
       return;
     }
 
-    try{
-      const response = await api.post('/users/create', { name, email, password, token: captchaValue });
-      if(response.status === 201){
+    try {
+      const response = await api.post("/users/create", {
+        name,
+        email,
+        password,
+        token: captchaValue,
+      });
+      if (response.status === 201) {
         setMode("login");
         setIsProfileOpen(true);
       }
-    }catch(error){
-      console.error("Signup failed:",error);
+    } catch (error) {
+      console.error("Signup failed:", error);
     }
-
   };
 
   const handleLogout = (): void => {
@@ -153,7 +168,7 @@ export type NavBarRef = {
     localStorage.removeItem("accessToken");
     navigate("/");
     setIsProfileOpen(false);
-  }
+  };
 
   const handleMenuItemClick = (path: string): void => {
     if (path.startsWith("#")) {
@@ -192,7 +207,7 @@ export type NavBarRef = {
   }, []);
 
   return (
-    <>
+    <div className="z-999">
       {/* drop down menu from the top */}
       <DropdownMenu
         isMenuOpen={isMenuOpen}
@@ -295,7 +310,7 @@ export type NavBarRef = {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 });
 

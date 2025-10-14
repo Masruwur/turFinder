@@ -55,7 +55,7 @@ export default function DropdownMenu({
             facebook
           </li>
           <li
-            onClick={() => window.open("mailto:contact@turfinder.com")}
+            onClick={() => handleMenuItemClick("/contact")}
             className={liStyles}>
             mail
           </li>
