@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef,forwardRef,useImperativeHandle } from "react";
 import "../index.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/turfinderlogo.png";
 import cal from "../assets/icons/calendar.svg";
 import profile from "../assets/icons/profile.svg";
@@ -29,6 +29,7 @@ export type NavBarRef = {
 
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const navbarRef = useRef<HTMLDivElement | null>(null);
@@ -155,6 +156,22 @@ export type NavBarRef = {
   }
 
   const handleMenuItemClick = (path: string): void => {
+    if (path.startsWith("#")) {
+      const targetId = path.slice(1);
+      setIsMenuOpen(false);
+
+      if (location.pathname !== "/") {
+        navigate("/", { state: { scrollTargetId: targetId } });
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        const section = document.getElementById(targetId);
+        section?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return;
+    }
+
     navigate(path);
     setIsMenuOpen(false); // Close menu
   };

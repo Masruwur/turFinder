@@ -37,7 +37,7 @@ export default function DropdownMenu({
             personal rating
           </li>
           <li
-            onClick={() => handleMenuItemClick("/about")}
+            onClick={() => handleMenuItemClick("#about-section")}
             className={liStyles}>
             about us
           </li>
