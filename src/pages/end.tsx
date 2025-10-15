@@ -150,36 +150,6 @@ export default function EndPage() {
               </div>
             </div>
           </div>
-
-          {/* CTA Section */}
-          <div className="space-y-4 pt-6 pb-20">
-            <div className="text-center lg:text-left">
-              <div className="text-2xl lg:text-3xl font-bureau text-white mb-2">
-                LAUNCHING FALL 2025!
-              </div>
-              <p className="text-sm font-redhatmono text-gray-400 uppercase tracking-wide mb-4">
-                Sign up for early access!
-              </p>
-            </div>
-
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex flex-col sm:flex-row gap-3 max-w-md">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 
-                rounded-lg text-white placeholder:text-gray-400 focus:outline-none 
-                focus:ring-2 focus:ring-red-500 focus:border-transparent font-redhatmono"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-yellow text-white font-redhatmono rounded-lg hover:from-red-600 hover:to-orange-600 transition-all cursor-pointer duration-200 flex items-center justify-center space-x-2">
-                <span>Join Waitlist</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </button>
-            </form>
-          </div>
         </div>
       </div>
     </div>

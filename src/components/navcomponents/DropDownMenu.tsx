@@ -57,7 +57,7 @@ export default function DropdownMenu({
           <li
             onClick={() => handleMenuItemClick("/contact")}
             className={liStyles}>
-            mail
+            contact us
           </li>
         </ul>
 

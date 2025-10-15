@@ -80,7 +80,7 @@ export default function ContactPage() {
           />
           <button
             type="submit"
-            className="rounded-xl bg-white px-6 py-3 text-base font-redhatmono uppercase tracking-wide text-slate-900 transition duration-200 hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:rounded-l-none sm:rounded-r-xl">
+            className="rounded-xl bg-white px-6 py-3 text-base font-redhatmono uppercase tracking-wide text-slate-900 transition duration-200 hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:rounded-l-none sm:rounded-r-xl">
             Join Waitlist
           </button>
         </form>
