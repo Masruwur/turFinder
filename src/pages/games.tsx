@@ -4,7 +4,6 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
-  MessageSquare,
   TrendingUp,
   Users,
   X,
@@ -21,7 +20,6 @@ interface SlotCardData extends TurfData {
 
 interface NotificationItem {
   id: number;
-  icon: React.ReactNode;
   label: string;
   time: string;
   description?: string;
@@ -42,7 +40,6 @@ export default function Games() {
     () => [
       {
         id: 1,
-        icon: <Bell className='w-4 h-4 text-yellow' />,
         label: "Turf Nova — price dropped 10%",
         time: "2m ago",
         description:
@@ -51,7 +48,6 @@ export default function Games() {
       },
       {
         id: 2,
-        icon: <MessageSquare className='w-4 h-4 text-green-300' />,
         label: "Aritra invited you to 7–9pm slot",
         time: "1h ago",
         description:
@@ -60,7 +56,6 @@ export default function Games() {
       },
       {
         id: 3,
-        icon: <Bell className='w-4 h-4 text-blue-300' />,
         label: "Booking confirmed — Futsal Hub",
         time: "Yesterday",
         description:
@@ -215,57 +210,45 @@ export default function Games() {
             onClick={closeNotification}
           />
           <div
-            className={`relative z-10 flex h-[min(90vh,420px)] w-[min(90vw,420px)] max-w-sm flex-col overflow-hidden rounded-[32px] border border-white/12 bg-neutral-900/95 text-neutral-100 shadow-[0_35px_120px_rgba(0,0,0,0.65)] transition-all duration-300 ${
+            className={`relative z-10 w-[min(90vw,380px)] max-w-sm overflow-hidden rounded-[32px] border border-white/10 bg-neutral-950/90 text-white shadow-[0_45px_120px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all duration-300 ${
               isNotificationVisible
                 ? "opacity-100 scale-100 translate-y-0"
-                : "pointer-events-none opacity-0 scale-95 translate-y-8"
+                : "pointer-events-none opacity-0 scale-[0.96] translate-y-8"
             }`}>
-            <div className='absolute inset-0 pointer-events-none'>
-              <div
-                className='absolute inset-0 opacity-60'
-                style={{
-                  background:
-                    "radial-gradient(120% 80% at 0% 0%, rgba(34,197,94,0.15) 0%, rgba(0,0,0,0) 60%), radial-gradient(120% 80% at 100% 100%, rgba(250,204,21,0.12) 0%, rgba(0,0,0,0) 70%)",
-                }}
-              />
-            </div>
+            <div className='absolute left-1/2 top-3 h-1.5 w-16 -translate-x-1/2 rounded-full bg-white/15' />
             <button
               type='button'
-              className='absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-neutral-800/80 text-neutral-200 transition hover:text-white focus:outline-none focus:ring-2 focus:ring-yellow/60'
+              className='absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30'
               onClick={closeNotification}
               aria-label='Close notifications panel'>
               <X className='h-4 w-4' />
             </button>
-            <div className='relative flex h-full flex-col gap-6 p-7'>
-              <div className='flex items-start gap-3'>
-                <div className='rounded-2xl border border-neutral-700/60 bg-neutral-800/80 p-3 text-yellow-200'>
-                  {activeNotification.icon}
+            <div className='space-y-6 p-8 pt-12'>
+              <div className='space-y-2'>
+                <div className='flex items-center gap-2 text-xs font-redhatmono uppercase tracking-[0.24em] text-white/50'>
+                  <span className='inline-flex h-1.5 w-1.5 rounded-full bg-white/60' />
+                  {activeNotification.time}
                 </div>
-                <div className='flex-1 space-y-1'>
-                  <p className='font-polysans text-xl font-semibold leading-snug'>
-                    {activeNotification.label}
-                  </p>
-                  <p className='text-xs font-redhatmono uppercase tracking-[0.24em] text-neutral-400'>
-                    {activeNotification.time}
-                  </p>
-                </div>
+                <p className='font-polysans text-xl font-semibold leading-snug'>
+                  {activeNotification.label}
+                </p>
               </div>
               {activeNotification.description && (
-                <p className='text-sm leading-relaxed text-neutral-300'>
+                <p className='text-sm leading-relaxed text-white/70'>
                   {activeNotification.description}
                 </p>
               )}
-              <div className='mt-auto space-y-4'>
+              <div className='space-y-6'>
                 {activeNotification.ctaLabel && (
                   <button
                     type='button'
                     onClick={closeNotification}
-                    className='w-full rounded-2xl bg-yellow py-3 text-sm font-semibold uppercase tracking-[0.2em] text-neutral-900 shadow-[0_12px_35px_rgba(234,179,8,0.4)] transition hover:shadow-[0_16px_45px_rgba(234,179,8,0.45)] focus:outline-none focus:ring-2 focus:ring-yellow/60'>
+                    className='w-full rounded-2xl bg-white/10 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25'>
                     {activeNotification.ctaLabel}
                   </button>
                 )}
                 <div className='flex items-center justify-between'>
-                  <div className='text-xs font-redhatmono uppercase tracking-[0.28em] text-neutral-500'>
+                  <div className='text-[11px] font-redhatmono uppercase tracking-[0.28em] text-white/40'>
                     {activeNotificationIndex !== null
                       ? `Notification ${activeNotificationIndex + 1} of ${notifications.length}`
                       : ""}
@@ -275,14 +258,14 @@ export default function Games() {
                       <button
                         type='button'
                         onClick={showPreviousNotification}
-                        className='flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-neutral-800/80 text-neutral-200 transition hover:text-white focus:outline-none focus:ring-2 focus:ring-yellow/60'
+                        className='flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 shadow-sm transition hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30'
                         aria-label='Previous notification'>
                         <ChevronLeft className='h-5 w-5' />
                       </button>
                       <button
                         type='button'
                         onClick={showNextNotification}
-                        className='flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-neutral-800/80 text-neutral-200 transition hover:text-white focus:outline-none focus:ring-2 focus:ring-yellow/60'
+                        className='flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 shadow-sm transition hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30'
                         aria-label='Next notification'>
                         <ChevronRight className='h-5 w-5' />
                       </button>
@@ -673,53 +656,75 @@ function InboxCard({
   isModalOpen: boolean;
   readMap: Record<number, boolean>;
 }) {
-  return (
-    <div className='rounded-3xl border border-neutral-800 bg-neutral-900/90 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'>
-      <div className='flex items-center justify-between mb-3'>
-        <h3 className='font-polysans text-lg font-semibold'>Notifications</h3>
-        <button
-          type='button'
-          onClick={() => items.length && onSelect(0)}
-          className='text-xs text-neutral-400 font-redhatmono uppercase tracking-[0.2em] transition hover:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow/60 rounded-lg px-2 py-1'>
-          View all
-        </button>
-      </div>
+  const unreadCount = items.reduce(
+    (count, notification) => (readMap[notification.id] ? count : count + 1),
+    0
+  );
 
-      <div className='space-y-2'>
-        {items.map((x, idx) => {
-          const isActive = isModalOpen && activeIndex === idx;
-          const isUnread = !readMap[x.id];
-          return (
+  return (
+    <div className='relative'>
+      <div className='pointer-events-none absolute left-1/2 -top-2 h-2 w-16 -translate-x-1/2 rounded-full bg-white/12' />
+      <div className='rounded-[32px] border border-white/10 bg-neutral-950/70 p-6 shadow-[0_32px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl'>
+        <div className='flex items-center justify-between gap-3 text-white'>
+          <div>
+            <p className='text-[11px] font-redhatmono uppercase tracking-[0.28em] text-white/40'>
+              Notification Center
+            </p>
+            <h3 className='font-polysans text-lg font-semibold'>Today</h3>
+          </div>
+          {items.length > 0 && (
             <button
-              key={x.id}
               type='button'
-              onClick={() => onSelect(idx)}
-              className={`w-full flex items-center gap-3 rounded-2xl border px-3 py-2 text-left transition focus:outline-none focus:ring-2 focus:ring-yellow/60 ${
-                isActive
-                  ? "border-yellow/60 bg-neutral-800"
-                  : "border-neutral-800/60 bg-neutral-800/60 hover:bg-neutral-800"
-              }`}>
-              <div
-                className={`rounded-xl border border-neutral-700 p-2 shrink-0 bg-neutral-900 flex items-center justify-center ${
-                  isUnread ? "ring-2 ring-yellow/50" : ""
-                }`}>
-                {x.icon}
-              </div>
-              <div className='flex-1 min-w-0'>
-                <p className='text-sm truncate'>{x.label}</p>
-                <p className='text-xs text-neutral-400 font-redhatmono'>
-                  {x.time}
-                </p>
-              </div>
-              {isUnread && (
-                <span
-                  className='h-2 w-2 rounded-full bg-yellow shrink-0'
-                  aria-hidden='true'
-                />
+              onClick={() => onSelect(0)}
+              className='flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-redhatmono uppercase tracking-[0.24em] text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25'>
+              Open
+              {unreadCount > 0 && (
+                <span className='flex h-5 w-5 items-center justify-center rounded-full bg-white text-neutral-900 text-[11px] font-semibold'>
+                  {unreadCount}
+                </span>
               )}
             </button>
-          );
-        })}
+          )}
+        </div>
+
+        <div className='relative mt-6'>
+          <div>
+            {items.map((x, idx) => {
+              const isActive = isModalOpen && activeIndex === idx;
+              const isUnread = !readMap[x.id];
+              return (
+                <button
+                  key={x.id}
+                  type='button'
+                  onClick={() => onSelect(idx)}
+                  style={{
+                    marginTop: idx === 0 ? 0 : -14,
+                    zIndex: items.length - idx,
+                  }}
+                  className={`relative flex w-full items-center justify-between gap-4 rounded-[28px] border border-white/12 bg-neutral-950/95 px-5 py-4 text-left text-white shadow-[0_22px_55px_rgba(0,0,0,0.45)] transition will-change-transform hover:-translate-y-0.5 hover:shadow-[0_28px_65px_rgba(0,0,0,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 ${
+                    isActive ? "ring-2 ring-white/25" : ""
+                  }`}>
+                  <div className='flex-1 min-w-0'>
+                    <p className='font-polysans text-sm font-semibold leading-tight text-white'>
+                      {x.label}
+                    </p>
+                  </div>
+                  <div className='flex flex-col items-end gap-2 shrink-0'>
+                    <span className='text-[11px] font-redhatmono uppercase tracking-[0.24em] text-white/40'>
+                      {x.time}
+                    </span>
+                    {isUnread && (
+                      <span
+                        className='h-2.5 w-2.5 rounded-full bg-white'
+                        aria-hidden='true'
+                      />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
