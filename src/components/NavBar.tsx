@@ -38,6 +38,8 @@ const NavBar = forwardRef<NavBarRef>((props, ref) => {
   const navbarRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLImageElement | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
 
   const { setUser } = useUser();
 
@@ -191,6 +193,63 @@ const NavBar = forwardRef<NavBarRef>((props, ref) => {
     setIsMenuOpen(false); // Close menu
   };
 
+  // Scroll handler (fade up/down) with throttling
+  useEffect(() => {
+    let ticking = false;
+
+    const controlNavbar = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+
+      // Always show at the top
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      }
+      // Only change visibility if scrolled more than threshold (10px)
+      else if (scrollDifference > 10) {
+        if (currentScrollY > lastScrollY) {
+          // Scrolling down - hide navbar
+          setIsVisible(false);
+        } else {
+          // Scrolling up - show navbar
+          setIsVisible(true);
+        }
+        setLastScrollY(currentScrollY);
+      }
+
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          controlNavbar();
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
+
+  // GSAP animation - fade up when hiding, fade down when showing
+  useEffect(() => {
+    if (navbarRef.current) {
+      gsap.to(navbarRef.current, {
+        opacity: isVisible ? 1 : 0,
+        y: isVisible ? 0 : -20, // move up when hiding, down when showing
+        pointerEvents: isVisible ? "auto" : "none",
+        duration: 0.3,
+        ease: "power1.inOut",
+      });
+    }
+  }, [isVisible]);
+
+  // Logo spin animation
   useEffect(() => {
     const spin = () => {
       if (logoRef.current) {
