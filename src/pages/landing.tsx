@@ -1,17 +1,9 @@
 import "../index.css";
 import running from "../assets/runningmen.jpg";
-import { Suspense, lazy } from "react";
-
-const NavBar = lazy(() => import("../components/NavBar"));
 
 export default function LandingPage() {
   return (
-    <div className="flex justify-center w-screen h-screen">
-      <div className="fixed z-50">
-        <Suspense fallback={<div className="w-full h-full bg-transparent" />}>
-          <NavBar />
-        </Suspense>
-      </div>
+    <div className="flex justify-center w-screen min-h-screen">
       <div className="flex justify-center items-center z-30">
         <img
           className="w-70 sm:w-90 md:w-110 rounded-3xl shrink-0"
