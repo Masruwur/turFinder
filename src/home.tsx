@@ -3,6 +3,8 @@ import { lazy, Suspense, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DeferSection } from "./util/DeferSection";
 
+const NavBar = lazy(() => import("./components/NavBar"));
+
 const FinderPage = lazy(() => import("./pages/finder"));
 const FactsPage = lazy(() => import("./pages/facts"));
 const EndPage = lazy(() => import("./pages/end"));
@@ -39,6 +41,11 @@ export default function HomePage() {
 
   return (
     <div className="bg-almostwhite">
+      <div className="fixed z-50">
+        <Suspense fallback={<div className="w-full h-full bg-transparent" />}>
+          <NavBar />
+        </Suspense>
+      </div>
       {/* Landing Page - same sticky transition as others */}
       <section className="sticky top-0 h-screen z-0 overflow-hidden">
         <LandingPage />
