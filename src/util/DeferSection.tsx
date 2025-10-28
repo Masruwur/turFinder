@@ -1,12 +1,25 @@
-import { useEffect, useRef, useState, PropsWithChildren } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  PropsWithChildren,
+  HTMLAttributes,
+} from "react";
+
+type DeferSectionProps = HTMLAttributes<HTMLElement> & {
+  minHeight?: number;
+  rootMargin?: string;
+};
 
 export function DeferSection({
   children,
   minHeight = 600,
   rootMargin = "600px",
-}: PropsWithChildren<{ minHeight?: number; rootMargin?: string }>) {
+  style,
+  ...sectionProps
+}: PropsWithChildren<DeferSectionProps>) {
   const [show, setShow] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
+  const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const el = ref.current!;
@@ -26,7 +39,8 @@ export function DeferSection({
   return (
     <section
       ref={ref}
-      style={{ minHeight }}>
+      style={{ minHeight, ...style }}
+      {...sectionProps}>
       {show ? children : null}
     </section>
   );

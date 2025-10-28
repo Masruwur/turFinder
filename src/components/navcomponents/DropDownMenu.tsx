@@ -37,7 +37,7 @@ export default function DropdownMenu({
             personal rating
           </li>
           <li
-            onClick={() => handleMenuItemClick("/about")}
+            onClick={() => handleMenuItemClick("#about-section")}
             className={liStyles}>
             about us
           </li>
@@ -55,9 +55,9 @@ export default function DropdownMenu({
             facebook
           </li>
           <li
-            onClick={() => window.open("mailto:contact@turfinder.com")}
+            onClick={() => handleMenuItemClick("/contact")}
             className={liStyles}>
-            mail
+            contact us
           </li>
         </ul>
 

@@ -201,7 +201,7 @@ export default function SignUp({
 
       {isProfileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-10 
+          className="fixed inset-0 bg-black/50 z-40 pointer-events-auto
           transition-all duration-500 ease-in-out"
           onClick={toggleProfile}></div>
       )}

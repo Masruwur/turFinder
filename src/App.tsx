@@ -9,6 +9,7 @@ import HomePage from "./home";
 const Slot = lazy(() => import("./pages/slot"));
 const Games = lazy(() => import("./pages/games"));
 const Payment = lazy(() => import("./pages/payment"));
+const Contact = lazy(() => import("./pages/contact"));
 
 export default function App() {
   const { setUser } = useUser();
@@ -40,6 +41,10 @@ export default function App() {
           <Route
             path="/payment"
             element={<Payment />}
+          />
+          <Route
+            path="/contact"
+            element={<Contact />}
           />
         </Routes>
       </Suspense>

@@ -1,13 +1,29 @@
-import { useState, useRef } from "react";
-import depto from "../assets/depto.jpeg";
-import { BadgeCheck } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  BadgeCheck,
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  Users,
+  X,
+} from "lucide-react";
 import NavBar from "../components/NavBar";
+import depto from "../assets/depto.jpeg";
 import SearchIcon from "../assets/icons/search.svg";
 import { mockTurfs, TurfData } from "../data/mockData";
 
-// Type alias for games page specific data structure
+// Extend your data to include slot string like "3/10"
 interface SlotCardData extends TurfData {
-  slot: string; // Required for games page
+  slot: string;
+}
+
+interface NotificationItem {
+  id: number;
+  label: string;
+  time: string;
+  description?: string;
+  ctaLabel?: string;
 }
 
 export default function Games() {
@@ -16,18 +32,259 @@ export default function Games() {
   const searchRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
-  // Cast mockTurfs to SlotCardData since all our mock data has slot values
+  // Game toggle state
+  const [mode, setMode] = useState<GameMode>("join");
+  const [overlayVisible, setOverlayVisible] = useState(true);
+  const [miniVisible, setMiniVisible] = useState(false);
+  const notifications = useMemo<NotificationItem[]>(
+    () => [
+      {
+        id: 1,
+        label: "Club Volta - price dropped around 10%",
+        time: "2m ago",
+        description:
+          "Good news! Club Volta just lowered their hourly rate for tonight’s late slot. Perfect if you’re planning a quick pickup game with friends.",
+        ctaLabel: "View pricing",
+      },
+      {
+        id: 2,
+        label: "Adeeb invited you to a 7:30-9:00pm slot",
+        time: "5h ago",
+        description:
+          "Adeeb booked the 7:30-9:00pm slot at North Arena and saved you a spot. Let the squad know if you’re in so they can confirm lineups.",
+        ctaLabel: "Respond to invite",
+      },
+      {
+        id: 3,
+        label: "Booking confirmed - North Arena",
+        time: "Yesterday",
+        description:
+          "Your late-night session at North Arena is confirmed. Arrive 10 minutes early so the staff can brief you on the indoor rules.",
+        ctaLabel: "View booking",
+      },
+    ],
+    []
+  );
+  const [activeNotificationIndex, setActiveNotificationIndex] = useState<
+    number | null
+  >(null);
+  const [isNotificationMounted, setIsNotificationMounted] = useState(false);
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+  const animationFrameRef = useRef<number | null>(null);
+  const [readNotifications, setReadNotifications] = useState<
+    Record<number, boolean>
+  >({});
+
   const turfsWithSlots = mockTurfs as SlotCardData[];
 
-  // Filter turfs based on search term
-  const filteredTurfs = turfsWithSlots.filter(
-    (turf) =>
-      turf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      turf.location.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTurfs = useMemo(
+    () =>
+      turfsWithSlots.filter(
+        (t) =>
+          t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          t.location.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [turfsWithSlots, searchTerm]
   );
 
+  useEffect(() => {
+    if (!overlayVisible) {
+      const timer = window.setTimeout(() => setMiniVisible(true), 260);
+      return () => window.clearTimeout(timer);
+    }
+    setMiniVisible(false);
+  }, [overlayVisible]);
+
+  const openNotification = useCallback(
+    (index: number) => {
+      setActiveNotificationIndex(index);
+      const target = notifications[index];
+      if (target) {
+        setReadNotifications((prev) => {
+          if (prev[target.id]) return prev;
+          return { ...prev, [target.id]: true };
+        });
+      }
+      if (!isNotificationMounted) {
+        setIsNotificationMounted(true);
+        if (animationFrameRef.current !== null) {
+          window.cancelAnimationFrame(animationFrameRef.current);
+        }
+        animationFrameRef.current = window.requestAnimationFrame(() => {
+          setIsNotificationVisible(true);
+          animationFrameRef.current = null;
+        });
+      } else {
+        setIsNotificationVisible(true);
+      }
+    },
+    [isNotificationMounted, notifications]
+  );
+
+  const closeNotification = useCallback(() => {
+    if (!isNotificationMounted) return;
+    setIsNotificationVisible(false);
+  }, [isNotificationMounted]);
+
+  const showNextNotification = useCallback(() => {
+    setActiveNotificationIndex((prev) => {
+      if (prev === null) return prev;
+      return (prev + 1) % notifications.length;
+    });
+  }, [notifications.length]);
+
+  const showPreviousNotification = useCallback(() => {
+    setActiveNotificationIndex((prev) => {
+      if (prev === null) return prev;
+      return (prev - 1 + notifications.length) % notifications.length;
+    });
+  }, [notifications.length]);
+
+  useEffect(() => {
+    if (!isNotificationMounted) return;
+    if (isNotificationVisible) return;
+
+    const timer = window.setTimeout(() => {
+      setIsNotificationMounted(false);
+      setActiveNotificationIndex(null);
+    }, 260);
+    return () => window.clearTimeout(timer);
+  }, [isNotificationMounted, isNotificationVisible]);
+
+  useEffect(() => {
+    if (!isNotificationMounted) return;
+
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeNotification();
+      } else if (event.key === "ArrowRight" && notifications.length > 1) {
+        event.preventDefault();
+        showNextNotification();
+      } else if (event.key === "ArrowLeft" && notifications.length > 1) {
+        event.preventDefault();
+        showPreviousNotification();
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [
+    closeNotification,
+    isNotificationMounted,
+    notifications.length,
+    showNextNotification,
+    showPreviousNotification,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
+  const handleSelect = (value: GameMode) => {
+    setMode(value);
+    if (overlayVisible) {
+      setOverlayVisible(false);
+    }
+  };
+
+  const activeNotification =
+    activeNotificationIndex !== null
+      ? notifications[activeNotificationIndex]
+      : null;
+  const hasMultipleNotifications = notifications.length > 1;
+
   return (
-    <div className="min-h-screen bg-green-800 px-5 py-25 text-neutral-100">
+    <div className="min-h-screen bg-green-800 text-neutral-100">
+      <NavBar />
+      {isNotificationMounted && activeNotification && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
+          <div
+            className={`absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
+              isNotificationVisible ? "opacity-100" : "opacity-0"
+            }`}
+            onClick={closeNotification}
+          />
+          <div
+            className={`relative z-10 w-[min(90vw,380px)] max-w-sm overflow-hidden rounded-[32px] border border-white/10 bg-neutral-950/90 text-white shadow-[0_45px_120px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all duration-300 ${
+              isNotificationVisible
+                ? "opacity-100 scale-100 translate-y-0"
+                : "pointer-events-none opacity-0 scale-[0.96] translate-y-8"
+            }`}>
+            <div className="absolute left-1/2 top-3 h-1.5 w-16 -translate-x-1/2 rounded-full bg-white/15" />
+            <button
+              type="button"
+              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              onClick={closeNotification}
+              aria-label="Close notifications panel">
+              <X className="h-4 w-4" />
+            </button>
+            <div className="space-y-6 p-8 pt-12">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs font-redhatmono uppercase tracking-[0.24em] text-white/50">
+                  <span className="inline-flex h-1.5 w-1.5 rounded-full bg-white/60" />
+                  {activeNotification.time}
+                </div>
+                <p className="font-polysans text-xl font-semibold leading-snug">
+                  {activeNotification.label}
+                </p>
+              </div>
+              {activeNotification.description && (
+                <p className="text-sm leading-relaxed text-white/70">
+                  {activeNotification.description}
+                </p>
+              )}
+              <div className="space-y-6">
+                {activeNotification.ctaLabel && (
+                  <button
+                    type="button"
+                    onClick={closeNotification}
+                    className="w-full rounded-2xl bg-white/10 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25">
+                    {activeNotification.ctaLabel}
+                  </button>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="text-[11px] font-redhatmono uppercase tracking-[0.28em] text-white/40">
+                    {activeNotificationIndex !== null
+                      ? `Notification ${activeNotificationIndex + 1} of ${
+                          notifications.length
+                        }`
+                      : ""}
+                  </div>
+                  {hasMultipleNotifications && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={showPreviousNotification}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 shadow-sm transition hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                        aria-label="Previous notification">
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={showNextNotification}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 shadow-sm transition hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                        aria-label="Next notification">
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <GamesToggle
+        mode={mode}
+        overlayVisible={overlayVisible}
+        handleSelect={handleSelect}
+      />
+      {/* backdrop grid */}
       <div
         style={{
           position: "fixed",
@@ -36,38 +293,110 @@ export default function Games() {
           backgroundImage:
             "repeating-linear-gradient(to right, #262626 0px, #262626 1px, transparent 1px, transparent 100px), repeating-linear-gradient(to bottom, #262626 0px, #262626 1px, transparent 1px, transparent 100px)",
           backgroundSize: "60px 60px",
+          pointerEvents: "none",
         }}
       />
-      <NavBar />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header row with title and search */}
-        <div className="flex items-center justify-between mb-6 ml-2 gap-2">
+
+      {/* Tighter container */}
+      <div className="relative z-10 mx-auto max-w-[1800px] px-4 lg:px-6 xl:px-8 2xl:px-10 py-6">
+        {/* Title + Search */}
+        <div className="grid grid-cols-1 md:grid-cols-2 items-center mb-6 gap-3">
           <h1
             ref={titleRef}
-            className={`font-polysans font-bold text-white tracking-tight transition-all 
-              duration-300 ease-in-out transform origin-left ${
-                isSearchExpanded ? "scale-80  text-md" : "scale-100  text-3xl"
-              } whitespace-nowrap overflow-hidden`}>
+            className={`font-polysans font-bold text-white tracking-tight transition-all duration-300 origin-left text-3xl
+            }`}>
             FIND GAMES!
           </h1>
 
-          <Header
-            turfs={turfsWithSlots}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            searchRef={searchRef}
-            titleRef={titleRef}
-            isSearchExpanded={isSearchExpanded}
-            setIsSearchExpanded={setIsSearchExpanded}
-          />
+          <div
+            className="justify-self-start md:justify-self-end"
+            ref={searchRef}>
+            <HeaderSearch
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              isSearchExpanded={isSearchExpanded}
+              setIsSearchExpanded={setIsSearchExpanded}
+            />
+          </div>
         </div>
 
-        <div className="mt-5 flex flex-col lg:flex-row gap-6">
-          <aside className="order-1 lg:order-none lg:sticky lg:top-6 lg:w-[300px] lg:flex-shrink-0">
-            <ProfileCard />
+        {/* ===== Responsive layout with contextual sidebar ===== */}
+        <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[360px_minmax(0,1fr)]">
+          {/* LEFT COLUMN */}
+          <aside className="order-1 lg:order-1 space-y-6 min-w-0 pointer-events-auto xl:sticky xl:top-6">
+            {/* Compact toggle that appears above profile card */}
+            <div
+              className={`transition-all duration-300 ${
+                miniVisible
+                  ? "opacity-100 translate-y-0 mb-4"
+                  : "opacity-0 -translate-y-4 h-0 overflow-hidden mb-0"
+              }`}>
+              <div className="rounded-3xl border border-neutral-600/80 bg-neutral-900/98 px-5 py-4 shadow-[0_25px_50px_rgba(0,0,0,0.6)] backdrop-blur-md ring-1 ring-white/10">
+                <div className="mb-3 flex items-center justify-between text-[11px] font-redhatmono uppercase tracking-[0.24em] text-neutral-300">
+                  <span>Game mode</span>
+                  <span className="text-neutral-400 normal-case tracking-normal">
+                    {mode === "join" ? "Looking to play" : "Hosting"}
+                  </span>
+                </div>
+                <div className="flex gap-1 rounded-2xl bg-neutral-800/90 p-1 border border-neutral-700/50">
+                  {gameModes.map((option) => {
+                    const isActive = option.value === mode;
+                    return (
+                      <button
+                        key={option.value}
+                        onClick={() => handleSelect(option.value)}
+                        className={`flex-1 rounded-2xl px-4 py-2.5 text-sm font-redhatmono transition-all duration-200 ${
+                          isActive
+                            ? "bg-white text-neutral-900 shadow-[0_8px_20px_rgba(0,0,0,0.4)] ring-1 ring-white/20"
+                            : "text-neutral-300 hover:text-white hover:bg-neutral-700/50"
+                        }`}>
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <ProfileCard />
+            </div>
+            <InboxCard
+              items={notifications}
+              onSelect={openNotification}
+              activeIndex={activeNotificationIndex}
+              isModalOpen={isNotificationMounted}
+              readMap={readNotifications}
+            />
+            <StatsPanel
+              stats={[
+                {
+                  id: "games",
+                  label: "Monthly Games",
+                  value: "4",
+                  delta: "+1",
+                  icon: <Users className="w-4 h-4" />,
+                },
+                {
+                  id: "att",
+                  label: "Atten- dance",
+                  value: "92%",
+                  delta: "+6%",
+                  icon: <TrendingUp className="w-4 h-4" />,
+                },
+                {
+                  id: "inv",
+                  label: "New Invites",
+                  value: "12",
+                  delta: "+3",
+                  icon: <Bell className="w-4 h-4" />,
+                },
+              ]}
+            />
           </aside>
 
-          <main className="order-2 z-5">
+          {/* RIGHT SIDE: card gallery */}
+          <main className="order-2 lg:order-2 min-w-0">
             <GalleryGrid turfs={filteredTurfs} />
           </main>
         </div>
@@ -76,54 +405,45 @@ export default function Games() {
   );
 }
 
-function Header({
-  turfs,
+/* =================== HEADER SEARCH =================== */
+function HeaderSearch({
   searchTerm,
   setSearchTerm,
-  searchRef,
-  titleRef,
   isSearchExpanded,
   setIsSearchExpanded,
 }: {
-  turfs: SlotCardData[];
   searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  searchRef: React.RefObject<HTMLDivElement | null>;
-  titleRef: React.RefObject<HTMLHeadingElement | null>;
+  setSearchTerm: (v: string) => void;
   isSearchExpanded: boolean;
-  setIsSearchExpanded: (expanded: boolean) => void;
+  setIsSearchExpanded: (b: boolean) => void;
 }) {
   return (
-    <div
-      ref={searchRef}
-      className="flex items-center">
-      {/* Desktop search bar */}
-      <div className="hidden md:block relative w-80">
+    <div className="flex items-center gap-3">
+      {/* Desktop */}
+      <div className="hidden md:block relative w-[28rem] max-w-full">
         <img
           src={SearchIcon}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 w-7"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-6"
         />
         <input
           type="text"
           placeholder="find games now"
           value={searchTerm}
-          onChange={(input) => setSearchTerm(input.target.value)}
-          className="w-full pl-13 pr-4 py-4 text-md rounded-2xl
-                         bg-gray-700 focus:outline-none focus:ring-2
-                         font-redhatmono text-white"
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-12 pr-4 py-3 rounded-2xl bg-gray-700/80 text-white font-redhatmono
+                     outline-none focus:ring-2 focus:ring-gray-400 transition"
         />
       </div>
 
-      {/* Mobile search - responsive and mobile-first */}
+      {/* Mobile */}
       <div className="md:hidden">
         <div
-          className={`relative transition-all duration-300 ease-out ${
-            isSearchExpanded ? "" : "w-12"
+          className={`relative transition-all duration-300 ${
+            isSearchExpanded ? "w-64" : "w-12"
           }`}>
           <div className="relative h-12 bg-almostwhite rounded-2xl">
-            {/* Search icon */}
             <div
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer"
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-10 cursor-pointer"
               onClick={() => !isSearchExpanded && setIsSearchExpanded(true)}>
               <img
                 src={SearchIcon}
@@ -132,32 +452,29 @@ function Header({
               />
             </div>
 
-            {/* Search input */}
             {isSearchExpanded && (
               <input
                 type="text"
                 placeholder="find games now"
                 value={searchTerm}
-                onChange={(input) => setSearchTerm(input.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 onBlur={() => {
                   if (!searchTerm) setIsSearchExpanded(false);
                 }}
                 autoFocus
                 className="w-full h-full pl-12 pr-10 bg-transparent rounded-2xl
-                         focus:outline-none focus:ring-2 focus:ring-gray-500
-                         font-redhatmono text-black text-sm"
+                           focus:outline-none focus:ring-2 focus:ring-gray-500
+                           font-redhatmono text-black text-sm"
               />
             )}
 
-            {/* Close button */}
             {isSearchExpanded && (
               <button
                 onClick={() => {
                   setSearchTerm("");
                   setIsSearchExpanded(false);
                 }}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 
-                         text-gray-400 hover:text-white text-lg">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
                 ×
               </button>
             )}
@@ -168,35 +485,248 @@ function Header({
   );
 }
 
+type GameMode = "join" | "host";
+
+const gameModes: Array<{
+  value: GameMode;
+  label: string;
+  badge: string;
+  description: string;
+}> = [
+  {
+    value: "join",
+    label: "Find a game",
+    badge: "Jump in",
+    description: "Observe ongoing bookings and request to join",
+  },
+  {
+    value: "host",
+    label: "Host a match",
+    badge: "invite players",
+    description:
+      "Create your own game, invite friends and leave requests open for eligible players",
+  },
+];
+
+function GamesToggle({
+  mode,
+  overlayVisible,
+  handleSelect,
+}: {
+  mode: GameMode;
+  overlayVisible: boolean;
+  handleSelect: (value: GameMode) => void;
+}) {
+  return (
+    <>
+      {/* Intro modal */}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
+          overlayVisible
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}>
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 w-[min(92vw,420px)] overflow-hidden rounded-[32px] border border-white/35 bg-gradient-to-br from-white via-white to-neutral-100 text-neutral-800 shadow-[0_30px_90px_rgba(13,20,26,0.5)]">
+          <div
+            className="absolute inset-0 pointer-events-none mix-blend-soft-light"
+            style={{
+              background:
+                "radial-gradient(120% 100% at 100% 0%, rgba(20,83,45,0.08) 0%, rgba(255,255,255,0) 60%), radial-gradient(90% 80% at 0% 100%, rgba(37,99,235,0.12) 0%, rgba(255,255,255,0) 65%)",
+            }}
+          />
+          <div className="relative flex flex-col gap-6 p-6">
+            <div className="flex items-center justify-between text-[11px] font-redhatmono uppercase tracking-[0.32em] text-neutral-400">
+              <span className="rounded-full bg-yellow px-3 py-1 text-black">
+                Today
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-redhatmono text-[12px] uppercase tracking-[0.3em] text-neutral-400">
+                Game mode
+              </p>
+              <h2 className="font-polysans text-3xl font-semibold text-neutral-900 leading-tight">
+                How are you playing today?
+              </h2>
+              <p className="text-sm text-neutral-500 leading-relaxed">
+                Decide if you want to jump into an existing slot or invite
+                people to fill-up your own game.
+              </p>
+            </div>
+
+            <div className="grid gap-3">
+              {gameModes.map((option) => {
+                const isActive = option.value === mode;
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => handleSelect(option.value)}
+                    className={`group relative overflow-hidden rounded-3xl border transition-all text-left cursor-pointer ${
+                      isActive
+                        ? "border-neutral-900 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.15)]"
+                        : "border-neutral-200 bg-white/70 hover:border-neutral-300 hover:shadow-[0_8px_25px_rgba(15,23,42,0.12)]"
+                    }`}>
+                    <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "radial-gradient(120% 120% at 80% 0%, rgba(34,197,94,0.12) 0%, rgba(255,255,255,0) 65%)",
+                        }}
+                      />
+                    </div>
+                    <div className="relative flex gap-4 p-5">
+                      <div className="flex-1 space-y-2">
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-redhatmono uppercase tracking-[0.24em] ${
+                            isActive
+                              ? "bg-neutral-900 text-neutral-50"
+                              : "bg-neutral-200 text-neutral-600"
+                          }`}>
+                          {option.badge}
+                        </span>
+                        <div>
+                          <div className="font-polysans text-xl font-semibold text-neutral-900">
+                            {option.label}
+                          </div>
+                          <p className="mt-1 text-sm text-neutral-500 leading-relaxed">
+                            {option.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* =================== LEFT COLUMN CARDS =================== */
 function ProfileCard() {
-  const [following, setFollowing] = useState(false);
+  return (
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-900/90 relative p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden z-10">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 10% 0%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0) 60%)",
+        }}
+      />
+      <div className="flex gap-4 relative">
+        <img
+          src={depto}
+          alt="Profile"
+          className="w-20 h-20 rounded-2xl object-cover flex-shrink-0"
+        />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold truncate">Rawnak Hossain</h2>
+            <BadgeCheck className="fill-white text-black w-4 h-4 shrink-0" />
+          </div>
+          <p className="text-neutral-400 font-redhatmono text-sm truncate">
+            CDM
+          </p>
+          <p className="text-neutral-400 font-redhatmono text-sm truncate">
+            Toxic Pants
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InboxCard({
+  items,
+  onSelect,
+  activeIndex,
+  isModalOpen,
+  readMap,
+}: {
+  items: NotificationItem[];
+  onSelect: (index: number) => void;
+  activeIndex: number | null;
+  isModalOpen: boolean;
+  readMap: Record<number, boolean>;
+}) {
+  const unreadCount = items.reduce(
+    (count, notification) => (readMap[notification.id] ? count : count + 1),
+    0
+  );
 
   return (
-    <div
-      className="rounded-3xl border border-neutral-800 bg-neutral-900
-      relative z-10
-      p-4 sm:p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-      <div className="flex gap-4">
-        <div className="overflow-hidden rounded-2xl flex-shrink-0 items-center">
-          <img
-            src={depto}
-            alt="Profile"
-            className="w-20 h-20 rounded-2xl object-cover"
-          />
-        </div>
-        <div className="flex-1">
-          <div className="items-center">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Rawnak Hossain</h2>
-              <BadgeCheck className="fill-white text-black w-4 h-4" />
-            </div>
-            <p className=" text-neutral-400 font-redhatmono text-sm">CDM</p>
-            <p className="text-neutral-400 font-redhatmono text-sm">
-              Toxic Pants
+    <div className="relative">
+      <div className="pointer-events-none absolute left-1/2 -top-2 h-2 w-16 -translate-x-1/2 rounded-full bg-white/12" />
+      <div className="rounded-4xl border border-white/10 bg-neutral-950/70 p-6 shadow-[0_32px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+        <div className="flex items-center justify-between gap-3 text-white">
+          <div>
+            <p className="text-[11px] font-redhatmono uppercase tracking-[0.28em] text-white/40">
+              Notification Center
             </p>
-            <div className="font-redhatmono text-sm text-yellow pt-0.5">
-              <span className="text-white">4</span> games played
-            </div>
+            <h3 className="font-polysans text-lg font-semibold">Today</h3>
+          </div>
+          {items.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onSelect(0)}
+              className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-redhatmono uppercase tracking-[0.24em] text-white transition cursor-pointer
+                       hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25">
+              Open
+              {unreadCount > 0 && (
+                <span className="flex h-5 w-5 pl-0.5 items-center justify-center rounded-full bg-white text-neutral-900 text-xs font-semibold">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          )}
+        </div>
+
+        <div className="relative mt-6">
+          <div>
+            {items.map((x, idx) => {
+              const isActive = isModalOpen && activeIndex === idx;
+              const isUnread = !readMap[x.id];
+              return (
+                <button
+                  key={x.id}
+                  type="button"
+                  onClick={() => onSelect(idx)}
+                  style={{
+                    marginTop: idx === 0 ? 0 : -14,
+                    zIndex: items.length - idx,
+                  }}
+                  className={`relative flex w-full items-center justify-between gap-4 rounded-[28px] border border-white/12 bg-neutral-950/95 px-5 py-4 text-left text-white shadow-2xl transition will-change-transform cursor-pointer
+                              hover:-translate-y-0.5 hover:shadow-[0_28px_65px_rgba(0,0,0,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 ${
+                                isActive ? "ring-2 ring-white/25" : ""
+                              }`}>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-polysans text-sm font-semibold leading-tight text-white">
+                      {x.label}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <span className="text-[11px] font-redhatmono uppercase tracking-widest text-white/40">
+                      {x.time}
+                    </span>
+                    {isUnread && (
+                      <span
+                        className="h-2.5 w-2.5 rounded-full bg-white"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -204,38 +734,70 @@ function ProfileCard() {
   );
 }
 
+function StatsPanel({
+  stats,
+}: {
+  stats: {
+    id: string;
+    label: string;
+    value: string;
+    delta: string;
+    icon: React.ReactNode;
+  }[];
+}) {
+  return (
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-900/90 p-5 shadow-xl">
+      <h3 className="font-polysans text-lg font-semibold mb-3">Your stats</h3>
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {stats.map((s) => (
+          <div
+            key={s.id}
+            className="rounded-2xl bg-neutral-800/60 border border-neutral-700 px-1.5 py-3 flex flex-col gap-2">
+            <div className="flex items-center gap-1.5 text-neutral-300 min-w-0">
+              <span className="rounded-lg bg-neutral-900 border border-neutral-700 p-1.5 shrink-0">
+                {s.icon}
+              </span>
+              <span className="text-xs font-redhatmono break-words">
+                {s.label}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between p-1">
+              <span className="text-xl font-semibold px-1.5">{s.value}</span>
+              <span className="text-xs text-green-400 px-1 font-redhatmono">
+                {s.delta}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* =================== RIGHT SIDE: GALLERY =================== */
 function GalleryGrid({ turfs }: { turfs: SlotCardData[] }) {
   return (
     <>
       <div className="mb-4 flex justify-between items-center">
-        <div className="flex gap-2 font-redhatmono ml-auto">
-          <button
-            className="rounded-xl border border-neutral-800 px-3 
-          py-1.5 text-sm text-almostblack hover:bg-neutral-800 bg-almostwhite
-          active:bg-green/55 transition-all duration-200
-          ">
+        <div className="flex flex-wrap gap-2 font-redhatmono ml-auto">
+          <button className="rounded-xl border border-neutral-800 px-3 py-1.5 text-sm text-almostblack hover:bg-neutral-800 bg-almostwhite active:bg-green/55 transition">
             slots
           </button>
-          <button
-            className="rounded-xl border border-neutral-800 px-3 py-1.5 
-          text-sm text-almostblack  bg-almostwhite hover:bg-neutral-800
-          active:bg-green/55 transition-all duration-200
-          ">
+          <button className="rounded-xl border border-neutral-800 px-3 py-1.5 text-sm text-almostblack hover:bg-neutral-800 bg-almostwhite active:bg-green/55 transition">
             price
           </button>
-          <button
-            className="rounded-xl border border-neutral-800 px-3 py-1.5 
-          text-sm text-almostblack hover:bg-neutral-800 bg-almostwhite
-          active:bg-green/55 transition-all duration-200
-          ">
+          <button className="rounded-xl border border-neutral-800 px-3 py-1.5 text-sm text-almostblack hover:bg-neutral-800 bg-almostwhite active:bg-green/55 transition">
             distance
           </button>
         </div>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      {/* Auto-fit card grid with minimum card width to maintain readability */}
+      <div
+        className="grid gap-6"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
         {turfs.map((t) => (
-          <SlotCard
+          <UpgradedCard
             key={t.id}
             turf={t}
           />
@@ -245,60 +807,76 @@ function GalleryGrid({ turfs }: { turfs: SlotCardData[] }) {
   );
 }
 
-function SlotCard({ turf }: { turf: SlotCardData }) {
-  return (
-    <article className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 relative z-10">
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
-        <img
-          src={turf.image}
-          alt={turf.name}
-          className="h-full w-full object-cover"
-        />
-      </div>
+/* =================== CARD =================== */
+function UpgradedCard({ turf }: { turf: SlotCardData }) {
+  const [filled, total] = turf.slot.split("/").map(Number);
+  const pct = Math.min(100, Math.max(0, (filled / total) * 100));
+  const barColor =
+    pct <= 50 ? "bg-green-500" : pct <= 75 ? "bg-yellow-500" : "bg-red-500";
 
-      {/* Card content section */}
-      <div className="p-4 space-y-2">
-        {/* Title and location */}
-        <div>
-          <h4 className="font-polysans text-md font-bold text-white">
-            {turf.name}
-          </h4>
-          <p className="text-xs text-neutral-300 font-redhatmono">
-            {turf.location} • {turf.distance}
-          </p>
+  return (
+    <article className="group relative overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/90 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.45)] transition-transform hover:-translate-y-0.5 h-full">
+      {/* subtle gradients like inspo */}
+      <div
+        className="absolute inset-0 opacity-70 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 100% 0%, rgba(168,85,247,0.06) 0%, rgba(0,0,0,0) 60%), radial-gradient(120% 80% at 0% 100%, rgba(59,130,246,0.06) 0%, rgba(0,0,0,0) 60%)",
+        }}
+      />
+
+      <div className="relative">
+        <div className="relative aspect-[16/10] w-full overflow-hidden">
+          <img
+            src={turf.image}
+            alt={turf.name}
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-neutral-900/90 to-transparent" />
+          {/* constrained badges */}
+          <div className="absolute top-3 left-3 max-w-[55%] px-2.5 py-1 rounded-xl text-xs font-redhatmono bg-neutral-900/80 border border-neutral-700 text-neutral-200 truncate">
+            {turf.location}
+          </div>
+          <div className="absolute top-3 right-3 max-w-[35%] px-2.5 py-1 rounded-xl text-xs font-redhatmono bg-neutral-900/80 border border-neutral-700 text-neutral-200 truncate">
+            {turf.distance}
+          </div>
         </div>
 
-        {/* Price and slot info */}
-        <div className="flex items-center justify-between">
-          <div className="font-polysans text-md font-bold text-white">
-            &#2547;{turf.price}
-            <span className="font-redhatmono text-sm font-normal text-yellow">
-              /hour
-            </span>
+        <div className="p-4 sm:p-5 space-y-3">
+          <h4 className="font-polysans text-lg font-bold text-white truncate">
+            {turf.name}
+          </h4>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="font-polysans text-xl font-bold text-white">
+              &#2547;{turf.price}
+              <span className="font-redhatmono text-sm font-normal text-yellow">
+                /hour
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="w-24 h-2 bg-neutral-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${barColor}`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <span className="text-xs font-redhatmono text-neutral-400">
+                {turf.slot}
+              </span>
+            </div>
           </div>
 
-          {/* Slot Progress Bar */}
-          <div className="flex items-center gap-2">
-            <div className="w-16 h-2 bg-neutral-700 rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all duration-300 ${(() => {
-                  const [filled, total] = turf.slot.split("/").map(Number);
-                  const percentage = (filled / total) * 100;
-
-                  if (percentage <= 50) return "bg-green-500";
-                  if (percentage <= 75) return "bg-yellow-500";
-                  return "bg-red-500";
-                })()}`}
-                style={{
-                  width: `${(() => {
-                    const [filled, total] = turf.slot.split("/").map(Number);
-                    return (filled / total) * 100;
-                  })()}%`,
-                }}
-              />
-            </div>
-            <span className="text-xs font-redhatmono text-neutral-400">
-              {turf.slot}
+          <div className="flex flex-wrap gap-2">
+            <span className="px-2.5 py-1 rounded-xl text-xs font-redhatmono bg-neutral-800/70 border border-neutral-700">
+              5v5
+            </span>
+            <span className="px-2.5 py-1 rounded-xl text-xs font-redhatmono bg-neutral-800/70 border border-neutral-700">
+              Indoor
+            </span>
+            <span className="px-2.5 py-1 rounded-xl text-xs font-redhatmono bg-neutral-800/70 border border-neutral-700">
+              Lights
             </span>
           </div>
         </div>

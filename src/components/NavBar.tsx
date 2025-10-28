@@ -1,6 +1,12 @@
-import { useState, useEffect, useRef,forwardRef,useImperativeHandle } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import "../index.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/turfinderlogo.png";
 import cal from "../assets/icons/calendar.svg";
 import profile from "../assets/icons/profile.svg";
@@ -23,23 +29,23 @@ export type NavBarRef = {
   toggleProfile: () => void;
 };
 
-
-  const NavBar = forwardRef<NavBarRef>((props,ref) => {
-  
-
+const NavBar = forwardRef<NavBarRef>((props, ref) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const navbarRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLImageElement | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
 
   const { setUser } = useUser();
 
-   useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     toggleProfile: () => toggleProfile(),
-   }));
+  }));
 
   const handleCalendarClick = (): void => {
     setIsCalendarOpen(!isCalendarOpen);
@@ -98,52 +104,64 @@ export type NavBarRef = {
     setMode("login");
   };
 
-  const  handleLogin = async (email:string,password:string): Promise<void> => {
-    try{
-      const response = await api.post('/users/login', { email, password });
-      if(response.status === 200){
-        const accessToken  = response.data.token;
-        localStorage.setItem('accessToken', accessToken);
+  const handleLogin = async (
+    email: string,
+    password: string
+  ): Promise<void> => {
+    try {
+      const response = await api.post("/users/login", { email, password });
+      if (response.status === 200) {
+        const accessToken = response.data.token;
+        localStorage.setItem("accessToken", accessToken);
         const user: User = {
           id: response.data.id,
           name: response.data.name,
-          email: response.data.email
+          email: response.data.email,
         };
         setUser(user);
-        localStorage.setItem("user",JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(user));
       }
-    }catch(error){
-      console.error("Login failed:",error);
+    } catch (error) {
+      console.error("Login failed:", error);
     }
   };
 
-  const handleSignup = async (name:string,email:string,password:string,
-                              confirmPassword:string,isChecked:boolean,captchaValue:string|null): Promise<void> => {
-                                
-    if(!captchaValue){
+  const handleSignup = async (
+    name: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+    isChecked: boolean,
+    captchaValue: string | null
+  ): Promise<void> => {
+    if (!captchaValue) {
       alert("Please complete the reCAPTCHA");
       return;
-    }                            
+    }
 
-    if(password !== confirmPassword){
+    if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    if(!isChecked){
+    if (!isChecked) {
       alert("You must agree to the terms and conditions");
       return;
     }
 
-    try{
-      const response = await api.post('/users/create', { name, email, password, token: captchaValue });
-      if(response.status === 201){
+    try {
+      const response = await api.post("/users/create", {
+        name,
+        email,
+        password,
+        token: captchaValue,
+      });
+      if (response.status === 201) {
         setMode("login");
         setIsProfileOpen(true);
       }
-    }catch(error){
-      console.error("Signup failed:",error);
+    } catch (error) {
+      console.error("Signup failed:", error);
     }
-
   };
 
   const handleLogout = (): void => {
@@ -152,13 +170,86 @@ export type NavBarRef = {
     localStorage.removeItem("accessToken");
     navigate("/");
     setIsProfileOpen(false);
-  }
+  };
 
   const handleMenuItemClick = (path: string): void => {
+    if (path.startsWith("#")) {
+      const targetId = path.slice(1);
+      setIsMenuOpen(false);
+
+      if (location.pathname !== "/") {
+        navigate("/", { state: { scrollTargetId: targetId } });
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        const section = document.getElementById(targetId);
+        section?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return;
+    }
+
     navigate(path);
     setIsMenuOpen(false); // Close menu
   };
 
+  // Scroll handler (fade up/down) with throttling
+  useEffect(() => {
+    let ticking = false;
+
+    const controlNavbar = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+
+      // Always show at the top
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      }
+      // Only change visibility if scrolled more than threshold (10px)
+      else if (scrollDifference > 10) {
+        if (currentScrollY > lastScrollY) {
+          // Scrolling down - hide navbar
+          setIsVisible(false);
+        } else {
+          // Scrolling up - show navbar
+          setIsVisible(true);
+        }
+        setLastScrollY(currentScrollY);
+      }
+
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          controlNavbar();
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
+
+  // GSAP animation - fade up when hiding, fade down when showing
+  useEffect(() => {
+    if (navbarRef.current) {
+      gsap.to(navbarRef.current, {
+        opacity: isVisible ? 1 : 0,
+        y: isVisible ? 0 : -20, // move up when hiding, down when showing
+        pointerEvents: isVisible ? "auto" : "none",
+        duration: 0.3,
+        ease: "power1.inOut",
+      });
+    }
+  }, [isVisible]);
+
+  // Logo spin animation
   useEffect(() => {
     const spin = () => {
       if (logoRef.current) {
@@ -175,7 +266,7 @@ export type NavBarRef = {
   }, []);
 
   return (
-    <>
+    <div className="z-999">
       {/* drop down menu from the top */}
       <DropdownMenu
         isMenuOpen={isMenuOpen}
@@ -278,7 +369,7 @@ export type NavBarRef = {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 });
 
